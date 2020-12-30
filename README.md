@@ -23,6 +23,7 @@ PB3       | DHT11 (pin 2)
 PB4       | DS18B20 (yellow wire)
 PB5       | N/C
 
+The sensors data lines have a 4.7K PullUp resistor, and the I2C bus have a 10K PullUp resistor, both in SDA and SCL.
 
 ## Compilation and flashing
 
