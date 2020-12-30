@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "*.ui": "xml",
+        "io.h": "c",
+        "iotn85.h": "c",
+        "delay.h": "c",
+        "gpio.h": "c",
+        "softwareserial.h": "c",
+        "inttypes.h": "c",
+        "stddef.h": "c",
+        "utils.h": "c",
+        "cstdio": "cpp",
+        "ds18b20.h": "c",
+        "power.h": "c",
+        "pgmspace.h": "c",
+        "cpufunc.h": "c",
+        "builtins.h": "c",
+        "delay_basic.h": "c"
+    }
+}

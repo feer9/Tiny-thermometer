@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/include",
+                "/usr/avr/include/**"
+            ],
+            "defines": [
+                "__AVR_ATtiny85__",
+                "F_CPU=8000000"
+            ],
+            "compilerPath": "/usr/bin/avr-g++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "compilerArgs": [
+                "-Wall",
+                "-Os",
+                "-I.",
+                "-D__AVR_ATtiny85__",
+                "-DF_CPU=8000000",
+                "-mmcu=attiny85"
+            ]
+        }
+    ],
+    "version": 4
+}
