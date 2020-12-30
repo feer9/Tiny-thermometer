@@ -14,7 +14,7 @@ I've just joined them at my personal taste, so I'll let the link to those projec
 
 ## Electrical connection
 
-ATtiny85  | 
+ATtiny85  | Connected to
 --------- | ---------------------
 PB0       | Display SDA
 PB1       | Status LED
