@@ -29,7 +29,7 @@ PB5       | N/C
 I've only tested it with avr-gcc on linux.  
 To compile you need `avr-gcc` and `avr-g++`.  
 To flash it I've used `avrdude` with an `usbasp-clone` avr programmer from [this other project](https://github.com/feer9/FASTUSBasp) running on an STM32F407VET6.  
-Running `make flash` will compile and flash the program, but the first time you can `make install` to flash the program and the fuses to match the clock speed.  
+Running `make flash` will compile and flash the program, but the first time you can `make install` to flash the program and fuses to match the clock speed.  
 
 ## Code included in this project:
 
