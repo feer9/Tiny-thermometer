@@ -60,8 +60,7 @@ void setup(){
   pinmode_output(LED_PIN);
   pin_clear(LED_PIN);
   
-  oled.init(0x3c);
-  oled.clear();
+  oled.init(SlaveAddress);
 
   prepareDisplay();
 
@@ -87,8 +86,8 @@ void loop(){
   uint32_t tick = get_tick();
 
   
-  if(tick > t1+250) { // update ds18b20
-    t1 = tick;
+  if(tick > t1) { // update ds18b20
+    t1 = tick+250;
     pin_set(tiny_led); 
     
     // Read ds18b20 data
@@ -108,8 +107,8 @@ void loop(){
     pin_clear(tiny_led);
   }
 
-  if(tick > t2+1200) { // update dht11
-    t2 = tick;
+  if(tick > t2) { // update dht11
+    t2 = tick+1200;
     pin_set(tiny_led);
 
     // Read DHT11 data
@@ -143,8 +142,8 @@ void loop(){
     pin_clear(tiny_led);
   }
 
-  if(tick > t3+1000) { // thermometer animation
-    t3 = tick;
+  if(tick > t3) { // thermometer animation
+    t3 = tick+1000;
     static uint8_t st = 0;
     if(st == 0)
       oled.drawImage( img_thermometer_cold, 5,1, 5, 3 );
