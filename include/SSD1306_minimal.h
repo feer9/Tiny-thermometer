@@ -140,8 +140,8 @@ class SSD1306_Mini {
     void printNumberTo(uint8_t row, uint8_t col, int num);
 
     // print a floating point number to the screen in a given position
-    void printFloatTo(uint8_t row, uint8_t col, float32_t num, 
-                       uint8_t decimal_digits = 2);
+    void printFloatTo(uint8_t row, uint8_t col, const ifloat32_t& num, 
+                       uint8_t decimal_digits = 1);
     
     // draw an image with defined x,y position and width,height definition
     void drawImage( const unsigned char * img, unsigned char col, unsigned char row, 

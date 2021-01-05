@@ -6,6 +6,8 @@
 #include <string.h>
 
 #ifdef __cplusplus
+#include "ifloat32_t.h"
+
 extern "C" {
 #endif
 
@@ -54,11 +56,14 @@ extern "C" {
 #define SDA         PB0
 #define SCL         PB2
 
-// todo: conviene q sea una clase para poder generarla en base a otros formatos
-typedef struct {
-  int16_t integer;
-  int16_t decimal;
-} float32_t;
+
+#define UNITS_POSITION 104 
+#define OLED_CHAR_WIDTH 6
+
+//typedef struct {
+//  int16_t integer;
+//  int16_t decimal;
+//} float32_t;
 
 void Timer0_init(void);
 uint32_t get_tick(void);

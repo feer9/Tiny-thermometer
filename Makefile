@@ -6,8 +6,10 @@ CLOCK       = 8000000
 PROGRAMMER  = usbasp-clone
 
 HEADERS    := $(wildcard include/*.h include/**/*.h)
-CSOURCES   := ds18b20.c onewire.c romsearch.c tinudht.c timer.c
-CXXSOURCES := main.cpp SSD1306_minimal.cpp TinyWireM.cpp USI_TWI_Master.cpp
+CSOURCES   :=  tinudht.c timer.c onewire.c romsearch.c
+#
+CXXSOURCES := main.cpp SSD1306_minimal.cpp TinyWireM.cpp USI_TWI_Master.cpp ifloat32_t.cpp ds18b20.cpp 
+#
 COBJECTS   := $(CSOURCES:%.c=obj/%.o)
 CXXOBJECTS := $(CXXSOURCES:%.cpp=obj/%.o)
 OBJECTS    := $(COBJECTS) $(CXXOBJECTS)
@@ -24,7 +26,8 @@ FUSES         = $(FUSES_8MHZ)
 AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B1
 CC = avr-gcc
 CXX = avr-g++
-CFLAGS =  -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
+CFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
+CXXFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -fno-threadsafe-statics
 COMPILE = $(CXX) $(CFLAGS)
 
 # symbolic targets:
@@ -41,7 +44,7 @@ $(COBJECTS): obj/%.o: src/%.c Makefile $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(CXXOBJECTS): obj/%.o: src/%.cpp Makefile $(HEADERS)
-	$(CXX) $(CFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 #.S.o:
 #	$(COMPILE) -x assembler-with-cpp -c $< -o $@

@@ -69,7 +69,7 @@ void ds18b20match( volatile uint8_t *port, volatile uint8_t *direction, volatile
 
 //! Request temperature conversion and wait for it's completion, then get the result
 uint8_t ds18b20convert_read( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, 
-							 uint8_t mask, uint8_t *rom, float32_t *temperature )
+							 uint8_t mask, uint8_t *rom, ifloat32_t& temperature )
 {
 	//Send conversion request to DS18B20 on one wire bus
 
@@ -85,7 +85,8 @@ uint8_t ds18b20convert_read( volatile uint8_t *port, volatile uint8_t *direction
 
 	//Wait for convertion to complete
 	while((*portin & mask) == 0)
-		_NOP();
+	//	_NOP(); 
+		__asm__ __volatile__("nop");
 
 	return ds18b20read( port, direction, portin, mask, rom, temperature );
 }
@@ -186,7 +187,7 @@ uint8_t ds18b20csp( volatile uint8_t *port, volatile uint8_t *direction, volatil
 }
 
 //! Read temperature
-uint8_t ds18b20read( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t *rom, float32_t *temperature )
+uint8_t ds18b20read( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t *rom, ifloat32_t& temperature )
 {
 	//Read temperature from DS18B20
 	//Note: returns actual temperature * 16
@@ -199,13 +200,13 @@ uint8_t ds18b20read( volatile uint8_t *port, volatile uint8_t *direction, volati
 
 	if ( ec != DS18B20_ERROR_OK )
 	{
-		temperature->integer = temperature->decimal = 0;
+		temperature.setValues(0,0);
 		return ec;
 	}
 
 	//Get temperature from received data
-	temperature->integer = (int16_t) ((sp[1] << 8 ) + sp[0]) / 16;
-	temperature->decimal = (int16_t) (sp[0] & 0x0F) * 10000 / 16;
+	temperature.setInteger( (int16_t) ((sp[1] << 8 ) + sp[0]) / 16 );
+	temperature.setDecimal( (int16_t) (sp[0] & 0x0F) * 10000 / 16 );
 
 	return DS18B20_ERROR_OK;
 }

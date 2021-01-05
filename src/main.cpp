@@ -21,7 +21,6 @@ PB5: Reset
 
 static SSD1306_Mini oled;
 static const uint8_t ds18b20_pinMask = (1 << DS18B20_PIN);
-static char buf[32] = {' '};
 
 //byte array of bitmap 5x24px
 static const unsigned char  img_thermometer_cold[] PROGMEM = {
@@ -70,34 +69,30 @@ void setup(){
   Timer0_init();
 }    
 
-#define UNITS_POSITION 100 // todo: calcular donde chucha es esto
-
-void loop(){
+void loop() {
 
   static TinuDHT tinudht;
   static uint8_t tinudht_status;
   static uint8_t tinudht_last_temp = 0, tinudht_last_hum = 0;
 
-  static float32_t ds18b20 = { 0 };
-  static float32_t ds18b20_last = { 0 };
+  static ifloat32_t ds18b20;
+  static ifloat32_t ds18b20_last;
   static uint8_t ds18b20_status = DS18B20_OK;
   
   static uint32_t t1=0, t2=0, t3=0;
   uint32_t tick = get_tick();
 
-  
   if(tick > t1) { // update ds18b20
     t1 = tick+250;
     pin_set(tiny_led); 
     
     // Read ds18b20 data
-    ds18b20_status = ds18b20convert_read( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, &ds18b20 );
+    ds18b20_status = ds18b20convert_read( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, ds18b20 );
     
     if(ds18b20_status != DS18B20_OK) {
       oled.printStringTo(68, 1, "-       ");
     }
-    else if( (ds18b20_last.integer != ds18b20.integer) || 
-        (ds18b20_last.decimal != ds18b20.decimal) )
+    else if( ds18b20_last != ds18b20 )
     {
       ds18b20_last = ds18b20;
       oled.printFloatTo(68,1, ds18b20);
@@ -116,7 +111,7 @@ void loop(){
 
     if(tinudht_status != TINUDHT_OK) {
       tinudht_last_temp = tinudht_last_hum = 0xFF;
-      strcpy(buf, "-       ");
+      const char* buf = "-       ";
       oled.printStringTo(68, 2, buf);
       oled.printStringTo(68, 3, buf);
     }
@@ -127,7 +122,7 @@ void loop(){
         tinudht_last_temp = tinudht.temperature;
 
         // todo: add decimal digit
-        oled.printNumberTo(68,2, tinudht.temperature);
+        oled.printFloatTo(68,2, ifloat32_t(tinudht.temperature, tinudht.temp_dec));
         oled.printStringTo(UNITS_POSITION, 2, DEG);
       }
       if(tinudht.humidity != tinudht_last_hum)
@@ -135,7 +130,7 @@ void loop(){
         tinudht_last_hum = tinudht.humidity;
 
         oled.printNumberTo(68,3, tinudht.humidity);
-        oled.printStringTo(UNITS_POSITION, 3, "%");
+        oled.printStringTo(UNITS_POSITION + 7, 3, "%");
       }
     }
 

@@ -273,20 +273,25 @@ void SSD1306_Mini::printNumberTo(uint8_t row, uint8_t col, int num) {
   printStringTo(row, col, str);
 }
 
-void SSD1306_Mini::printFloatTo(uint8_t row, uint8_t col, float32_t num, 
+// row (horizontal): value from 0 to (128-6*lenght) in which to print data
+// col (vertical): value from 0 to 3
+// num: float number divided in two integers
+// decimal_digits: desired decimal places to print. Defaults to 1
+void SSD1306_Mini::printFloatTo(uint8_t row, uint8_t col, const ifloat32_t& num, 
                                 uint8_t decimal_digits) {
   char str[16] = "";
   char aux[8] = "", aux2[8] = "";
 
-  itoa(num.integer, str, 10);
+  itoa(num.getInteger(), str, 10);
 
   strcat(str, ".");
 
-  itoa(num.decimal, aux, 10);
+  itoa(num.getDecimal(), aux, 10);
 
-  uint8_t pad = decimal_digits - strnlen(aux, sizeof aux - 1);
+  uint8_t decimal_len = strnlen(aux, sizeof aux - 1); // actual decimal digits
+  uint8_t pad = 4 - decimal_len; // 4 is maximum expected decimal digits
 
-  if(pad)
+  if(decimal_len < decimal_digits && pad)
   {	
     memcpy(aux2, "0", pad);
     strcat(aux2, aux);
@@ -342,7 +347,6 @@ char* itoa(int value, char* result, int base) {
     }
     return result;
 }
-
 
 // a 5x7 font table
 const unsigned char  BasicFont[] PROGMEM = {
