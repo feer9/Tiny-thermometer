@@ -85,8 +85,7 @@ uint8_t ds18b20convert_read( volatile uint8_t *port, volatile uint8_t *direction
 
 	//Wait for convertion to complete
 	while((*portin & mask) == 0)
-	//	_NOP(); 
-		__asm__ __volatile__("nop");
+		_NOP();
 
 	return ds18b20read( port, direction, portin, mask, rom, temperature );
 }

@@ -14,15 +14,17 @@ void Timer0_init(void)
     TCCR0A = 0;							// Clear Control Register A
     TCNT0 = 0;							// Initialize counter value to 0
 
+
+    // Set Prescaler and Output Compare Register for 1 KHz periods
 #if (F_CPU == 16000000)
-	TCCR0B = (1<<CS01) | (1<<CS00);		// PCK / 64
-	OCR0A  = 250 - 1;					// Set Output Compare Register for 1 KHz increments
+	TCCR0B = (1<<CS01) | (1<<CS00);		// 16000000 / 64 = 250000
+	OCR0A  = 250 - 1;					
 #elif (F_CPU == 8000000)
-	TCCR0B = (1<<CS01) | (1<<CS00);		// PCK / 64
-	OCR0A  = 125 - 1;					// Set Output Compare Register for 1 KHz increments
+	TCCR0B = (1<<CS01) | (1<<CS00);		// 8000000 / 64  = 125000
+	OCR0A  = 125 - 1;					
 #elif (F_CPU == 1000000)
-	TCCR0B = (1<<CS01);					// PCK / 8
-	OCR0A  = 125 - 1;					// Set Output Compare Register for 1 KHz increments
+	TCCR0B = (1<<CS01);					// 1000000 / 8   = 125000
+	OCR0A  = 125 - 1;					
 #else
 #error Invalid F_CPU value
 #endif
@@ -40,7 +42,10 @@ ISR(TIMER0_COMPA_vect)
     ++tick;
 }
 
-uint32_t get_tick(void) { return tick; }
+uint32_t get_tick(void)
+{
+    return tick;
+}
 
 
 

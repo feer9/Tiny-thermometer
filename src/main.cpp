@@ -3,6 +3,7 @@
 #include <ds18b20/ds18b20.h>
 #include "SSD1306_minimal.h"
 #include <avr/pgmspace.h>
+#include <avr/sleep.h>
 
 #define delay(x) _delay_ms(x)
 #define LED_PIN  tiny_led
@@ -58,16 +59,19 @@ void prepareDisplay() {
 void setup(){
   pinmode_output(LED_PIN);
   pin_clear(LED_PIN);
-  
+
   oled.init(SlaveAddress);
 
   prepareDisplay();
 
 	_delay_ms(200);	// Delay for DHT11 to stabilize (REQUIRED on power on)
-  ds18b20wsp( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, 100, 0, 0x5F ); // resolution 11 bits
+  ds18b20wsp( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, 100, 0, DS18B20_RES11);
 
   Timer0_init();
-}    
+  
+  ACSR = _BV(ACD); // Turn off Analog Comparator
+  PRR = _BV(PRTIM1) | _BV(PRADC); // Shut down Timer1 and ADC
+}
 
 void loop() {
 
@@ -90,7 +94,7 @@ void loop() {
     ds18b20_status = ds18b20convert_read( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, ds18b20 );
     
     if(ds18b20_status != DS18B20_OK) {
-      oled.printStringTo(68, 1, "-       ");
+      oled.printStringTo(68, 1, _ERR_MSG);
     }
     else if( ds18b20_last != ds18b20 )
     {
@@ -103,7 +107,7 @@ void loop() {
   }
 
   if(tick > t2) { // update dht11
-    t2 = tick+1200;
+    t2 = tick+1500;
     pin_set(tiny_led);
 
     // Read DHT11 data
@@ -111,7 +115,7 @@ void loop() {
 
     if(tinudht_status != TINUDHT_OK) {
       tinudht_last_temp = tinudht_last_hum = 0xFF;
-      const char* buf = "-       ";
+      const char* buf = _ERR_MSG;
       oled.printStringTo(68, 2, buf);
       oled.printStringTo(68, 3, buf);
     }
@@ -149,6 +153,10 @@ void loop() {
     st = (st+1)%3;
   }
 
+  // Set sleep mode to IDLE, this allows TIMER/COUNTER0 to keep running
+  set_sleep_mode(SLEEP_MODE_IDLE);
+  // Sleep until a timer interrupt
+  sleep_mode();
 }
 
 int main(void)

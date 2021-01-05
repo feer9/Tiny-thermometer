@@ -59,6 +59,7 @@ extern "C" {
 
 #define UNITS_POSITION 104 
 #define OLED_CHAR_WIDTH 6
+#define _ERR_MSG "-       "
 
 //typedef struct {
 //  int16_t integer;
