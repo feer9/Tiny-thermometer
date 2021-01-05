@@ -18,6 +18,10 @@
 *	12/15/08	Added declaration of USI_TWI_Start_Memory_Read	-jkl
 ****************************************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //********** Defines **********//
 
 // Defines controlling timing limits - SCL <= 100KHz.
@@ -114,3 +118,7 @@ void          USI_TWI_Master_Initialise( void );
 unsigned char USI_TWI_Start_Random_Read( unsigned char * , unsigned char );
 unsigned char USI_TWI_Start_Read_Write( unsigned char * , unsigned char );
 unsigned char USI_TWI_Get_State_Info( void );
+
+#ifdef __cplusplus
+}
+#endif

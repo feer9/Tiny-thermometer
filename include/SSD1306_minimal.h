@@ -35,7 +35,7 @@
 #include "utils.h"
 
 // config
-#define SlaveAddress 0x3c
+#define ssd1306_address 0x3c
 
 // setup used wire lib
 #include "TinyWireM.h"
@@ -108,56 +108,51 @@
 
 
 
-class SSD1306_Mini {
+//class SSD1306_Mini {
   
-  public:
+//  public:
     
     // call this function once in "void setup()" to initiallize the display
-    void init(uint8_t address);
+    void ssd1306_init(uint8_t address);
   
     // reset clipArea to maximum and clear the display
-    void clear();
+    void ssd1306_clear();
     
     // move cursor to upper left corner in current clipArea
-    void startScreen();
+    void ssd1306_startScreen();
     
     // set the clipArea, by default (0,0,128,8)
-    void clipArea(unsigned char col, unsigned char row, unsigned char w, unsigned char h);
-    
+    void ssd1306_clipArea(unsigned char col, unsigned char row, unsigned char w, unsigned char h);
+
     // move the cursor to a location (similar to clipArea)
-    void cursorTo( unsigned char row, unsigned char col );
-    
+    void ssd1306_cursorTo( unsigned char row, unsigned char col );
+
     // print a single character
-    void printChar( char ch );
-    
+    void ssd1306_printChar( char ch );
+
     // print a string to the screen
-    void printString( const char * pText );
+    void ssd1306_printString( const char * pText );
 
     // print a string to the screen in a given position
-    void printStringTo(uint8_t row, uint8_t col, const char *str);
+    void ssd1306_printStringTo(uint8_t row, uint8_t col, const char *str);
 
     // print a number to the screen in a given position
-    void printNumberTo(uint8_t row, uint8_t col, int num);
+    void ssd1306_printNumberTo(uint8_t row, uint8_t col, int num);
 
     // print a floating point number to the screen in a given position
-    void printFloatTo(uint8_t row, uint8_t col, const ifloat32_t& num, 
-                       uint8_t decimal_digits = 1);
+    void ssd1306_printFloatTo(uint8_t row, uint8_t col, const float32_t num, 
+                       uint8_t decimal_digits);
     
     // draw an image with defined x,y position and width,height definition
-    void drawImage( const unsigned char * img, unsigned char col, unsigned char row, 
+    void ssd1306_drawImage( const unsigned char * img, unsigned char col, unsigned char row, 
                     unsigned char w, unsigned char h );
       
     //  
-    void displayX(int off);
+    void ssd1306_displayX(int off);
   
 //  private:
-    void sendCommand(unsigned char command);
-    void sendCommand(unsigned char command1, unsigned char command2);
-    void sendData(unsigned char Data);
-  
-    unsigned char getFlash( const unsigned char * mem, unsigned int idx  );
 
-};
+//};
 
 char* itoa(int value, char* result, int base);
 

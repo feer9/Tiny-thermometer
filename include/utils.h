@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <string.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 #include "ifloat32_t.h"
@@ -59,12 +60,16 @@ extern "C" {
 
 #define UNITS_POSITION 104 
 #define OLED_CHAR_WIDTH 6
-#define _ERR_MSG "-       "
+#define _ERR_MSG "ERR     "
 
-//typedef struct {
-//  int16_t integer;
-//  int16_t decimal;
-//} float32_t;
+
+typedef union {
+    uint32_t data;
+    struct {
+    int16_t integer;
+    int16_t decimal;
+    };
+ } float32_t;
 
 void Timer0_init(void);
 uint32_t get_tick(void);

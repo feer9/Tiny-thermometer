@@ -13,46 +13,48 @@
   PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 */
 
+#ifdef __cplusplus
 extern "C" {
   //#include "USI_TWI_Master.h"
   //#include <USI_TWI_Master.h>
   //#include <USI_TWI_Master\USI_TWI_Master.h>
   //#include <USI_TWI_Master/USI_TWI_Master.h>
 }
+#endif
 
 #include "USI_TWI_Master.h"
 #include "TinyWireM.h"
-
+#include <stdbool.h>
 
 // Initialize Class Variables //////////////////////////////////////////////////
-	uint8_t USI_TWI::USI_Buf[USI_BUF_SIZE];             // holds I2C send and receive data
-	uint8_t USI_TWI::USI_BufIdx = 0;                    // current number of bytes in the send buff
-	uint8_t USI_TWI::USI_LastRead = 0;                  // number of bytes read so far
-	uint8_t USI_TWI::USI_BytesAvail = 0;                // number of bytes requested but not read
+static	uint8_t USI_Buf[USI_BUF_SIZE];             // holds I2C send and receive data
+static	uint8_t USI_BufIdx = 0;                    // current number of bytes in the send buff
+static	uint8_t USI_LastRead = 0;                  // number of bytes read so far
+static	uint8_t USI_BytesAvail = 0;                // number of bytes requested but not read
 
 // Constructors ////////////////////////////////////////////////////////////////
 
-USI_TWI::USI_TWI(){
-}
+//USI_TWI::USI_TWI(){
+//}
 
 // Public Methods //////////////////////////////////////////////////////////////
 
-void USI_TWI::begin(){ // initialize I2C lib
+void USI_TWI_begin(){ // initialize I2C lib
   USI_TWI_Master_Initialise();          
 }
 
-void USI_TWI::beginTransmission(uint8_t slaveAddr){ // setup address & write bit
+void USI_TWI_beginTransmission(uint8_t slaveAddr){ // setup address & write bit
   USI_BufIdx = 0; 
   USI_Buf[USI_BufIdx] = (slaveAddr<<TWI_ADR_BITS) | USI_SEND; 
 }
 
-void USI_TWI::send(uint8_t data){ // buffers up data to send
+void USI_TWI_send(uint8_t data){ // buffers up data to send
   if (USI_BufIdx >= USI_BUF_SIZE) return;         // dont blow out the buffer
   USI_BufIdx++;                                   // inc for next byte in buffer
   USI_Buf[USI_BufIdx] = data;
 }
 
-uint8_t USI_TWI::endTransmission(){ // actually sends the buffer
+uint8_t USI_TWI_endTransmission(){ // actually sends the buffer
   bool xferOK = false;
   uint8_t errorCode = 0;
   xferOK = USI_TWI_Start_Read_Write(USI_Buf,USI_BufIdx+1); // core func that does the work
@@ -64,7 +66,7 @@ uint8_t USI_TWI::endTransmission(){ // actually sends the buffer
   }
 }
 
-uint8_t USI_TWI::requestFrom(uint8_t slaveAddr, uint8_t numBytes){ // setup for receiving from slave
+uint8_t USI_TWI_requestFrom(uint8_t slaveAddr, uint8_t numBytes){ // setup for receiving from slave
   bool xferOK = false;
   uint8_t errorCode = 0;
   USI_LastRead = 0;
@@ -80,17 +82,17 @@ uint8_t USI_TWI::requestFrom(uint8_t slaveAddr, uint8_t numBytes){ // setup for 
   }
 }
 
-uint8_t USI_TWI::receive(){ // returns the bytes received one at a time
+uint8_t USI_TWI_receive(){ // returns the bytes received one at a time
   USI_LastRead++;     // inc first since first uint8_t read is in USI_Buf[1]
   return USI_Buf[USI_LastRead];
 }
 
-uint8_t USI_TWI::available(){ // the bytes available that haven't been read yet
+uint8_t USI_TWI_available(){ // the bytes available that haven't been read yet
   return USI_BytesAvail - (USI_LastRead); 
 }
 
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
-USI_TWI TinyWireM = USI_TWI();
+//USI_TWI TinyWireM = USI_TWI();
 

@@ -6,10 +6,8 @@ CLOCK       = 8000000
 PROGRAMMER  = usbasp-clone
 
 HEADERS    := $(wildcard include/*.h include/**/*.h)
-CSOURCES   :=  tinudht.c timer.c onewire.c romsearch.c
-#
-CXXSOURCES := main.cpp SSD1306_minimal.cpp TinyWireM.cpp USI_TWI_Master.cpp ifloat32_t.cpp ds18b20.cpp 
-#
+CSOURCES   := tinudht.c timer.c onewire.c romsearch.c USI_TWI_Master.c ds18b20.c SSD1306_minimal.c TinyWireM.c main.c
+CXXSOURCES := 
 COBJECTS   := $(CSOURCES:%.c=obj/%.o)
 CXXOBJECTS := $(CXXSOURCES:%.cpp=obj/%.o)
 OBJECTS    := $(COBJECTS) $(CXXOBJECTS)
@@ -32,10 +30,10 @@ COMPILE = $(CXX) $(CFLAGS)
 
 # symbolic targets:
 all:	main.hex   ; 
-	$(info $$CSOURCES is [${CSOURCES}]) 
-	$(info $$CXXSOURCES is [${CXXSOURCES}])
-	$(info $$OBJECTS is [${OBJECTS}])
-	$(info $$HEADERS is [${HEADERS}])
+#	$(info $$CSOURCES is [${CSOURCES}]) 
+#	$(info $$CXXSOURCES is [${CXXSOURCES}])
+#	$(info $$OBJECTS is [${OBJECTS}])
+#	$(info $$HEADERS is [${HEADERS}])
 
 obj:
 	mkdir -p obj

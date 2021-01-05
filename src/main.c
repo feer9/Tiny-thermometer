@@ -20,7 +20,7 @@ PB5: Reset
 
 #define DEG "\xa7" "C"
 
-static SSD1306_Mini oled;
+//static SSD1306_Mini oled;
 static const uint8_t ds18b20_pinMask = (1 << DS18B20_PIN);
 
 //byte array of bitmap 5x24px
@@ -46,21 +46,21 @@ static const unsigned char  img_thermometer_hot[] PROGMEM = {
 
 void prepareDisplay() {
 
-  oled.clear();
-  oled.startScreen();
+  ssd1306_clear();
+  ssd1306_startScreen();
 
-  oled.drawImage( img_thermometer_cold, 5,1, 5, 3 );
+  ssd1306_drawImage( img_thermometer_cold, 5,1, 5, 3 );
 
-  oled.printStringTo(20, 1, "Water: -");
-  oled.printStringTo(20, 2, "Room:  -");
-  oled.printStringTo(20, 3, "Hum.:  -");
+  ssd1306_printStringTo(20, 1, "Water: -");
+  ssd1306_printStringTo(20, 2, "Room:  -");
+  ssd1306_printStringTo(20, 3, "Hum.:  -");
 }
 
 void setup(){
   pinmode_output(LED_PIN);
   pin_clear(LED_PIN);
 
-  oled.init(SlaveAddress);
+  ssd1306_init(ssd1306_address);
 
   prepareDisplay();
 
@@ -68,7 +68,7 @@ void setup(){
   ds18b20wsp( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, 100, 0, DS18B20_RES11);
 
   Timer0_init();
-  
+
   ACSR = _BV(ACD); // Turn off Analog Comparator
   PRR = _BV(PRTIM1) | _BV(PRADC); // Shut down Timer1 and ADC
 }
@@ -76,11 +76,11 @@ void setup(){
 void loop() {
 
   static TinuDHT tinudht;
+  static TinuDHT tinudht_last;
   static uint8_t tinudht_status;
-  static uint8_t tinudht_last_temp = 0, tinudht_last_hum = 0;
 
-  static ifloat32_t ds18b20;
-  static ifloat32_t ds18b20_last;
+  static float32_t ds18b20;
+  static float32_t ds18b20_last;
   static uint8_t ds18b20_status = DS18B20_OK;
   
   static uint32_t t1=0, t2=0, t3=0;
@@ -91,16 +91,16 @@ void loop() {
     pin_set(tiny_led); 
     
     // Read ds18b20 data
-    ds18b20_status = ds18b20convert_read( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, ds18b20 );
+    ds18b20_status = ds18b20convert_read( &PORTB, &DDRB, &PINB, ds18b20_pinMask, NULL, &ds18b20 );
     
     if(ds18b20_status != DS18B20_OK) {
-      oled.printStringTo(68, 1, _ERR_MSG);
+      ssd1306_printStringTo(68, 1, _ERR_MSG);
     }
-    else if( ds18b20_last != ds18b20 )
+    else if( ds18b20_last.data != ds18b20.data )
     {
       ds18b20_last = ds18b20;
-      oled.printFloatTo(68,1, ds18b20);
-      oled.printStringTo(UNITS_POSITION, 1, DEG);
+      ssd1306_printFloatTo(68,1, ds18b20, 1);
+      ssd1306_printStringTo(UNITS_POSITION, 1, DEG);
     }
 
     pin_clear(tiny_led);
@@ -113,30 +113,28 @@ void loop() {
     // Read DHT11 data
     tinudht_status = tinudht_read(&tinudht, TINUDHT_PIN);
 
-    if(tinudht_status != TINUDHT_OK) {
-      tinudht_last_temp = tinudht_last_hum = 0xFF;
+    if(tinudht_status != TINUDHT_OK)
+    {
       const char* buf = _ERR_MSG;
-      oled.printStringTo(68, 2, buf);
-      oled.printStringTo(68, 3, buf);
+      ssd1306_printStringTo(68, 2, buf);
+      ssd1306_printStringTo(68, 3, buf);
     }
     else
     {
-      if(tinudht.temperature != tinudht_last_temp)
+      if(tinudht.t != tinudht_last.t)
       {
-        tinudht_last_temp = tinudht.temperature;
-
-        // todo: add decimal digit
-        oled.printFloatTo(68,2, ifloat32_t(tinudht.temperature, tinudht.temp_dec));
-        oled.printStringTo(UNITS_POSITION, 2, DEG);
+        float32_t tmp;
+        tmp.integer = tinudht.temperature; tmp.decimal = tinudht.temp_dec;
+        ssd1306_printFloatTo(68,2, tmp, 1);
+        ssd1306_printStringTo(UNITS_POSITION, 2, DEG);
       }
-      if(tinudht.humidity != tinudht_last_hum)
+      if(tinudht.humidity != tinudht_last.humidity)
       {
-        tinudht_last_hum = tinudht.humidity;
-
-        oled.printNumberTo(68,3, tinudht.humidity);
-        oled.printStringTo(UNITS_POSITION + 7, 3, "%");
+        ssd1306_printNumberTo(68,3, tinudht.humidity);
+        ssd1306_printStringTo(UNITS_POSITION + 7, 3, "%");
       }
     }
+    tinudht_last = tinudht;
 
     pin_clear(tiny_led);
   }
@@ -145,11 +143,11 @@ void loop() {
     t3 = tick+1000;
     static uint8_t st = 0;
     if(st == 0)
-      oled.drawImage( img_thermometer_cold, 5,1, 5, 3 );
+      ssd1306_drawImage( img_thermometer_cold, 5,1, 5, 3 );
     else if (st == 1)
-      oled.drawImage( img_thermometer_warm, 5,1, 5, 3 );
+      ssd1306_drawImage( img_thermometer_warm, 5,1, 5, 3 );
     else
-      oled.drawImage( img_thermometer_hot,  5,1, 5, 3 );
+      ssd1306_drawImage( img_thermometer_hot,  5,1, 5, 3 );
     st = (st+1)%3;
   }
 

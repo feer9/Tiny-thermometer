@@ -27,48 +27,61 @@
 
 extern const unsigned char BasicFont[];
 
-unsigned char SSD1306_Mini::getFlash( const unsigned char * mem, unsigned int idx ) {
+static uint8_t SlaveAddress = 0;
+
+//// Private Functions
+static void sendCommand(unsigned char command);
+static void sendCommand2(unsigned char command1, unsigned char command2);
+//static void sendData(unsigned char Data);
+  
+static unsigned char getFlash( const unsigned char * mem, unsigned int idx  );
+
+//// End Private Functions
+
+unsigned char getFlash( const unsigned char * mem, unsigned int idx ) {
   unsigned char data= pgm_read_byte( &(mem[idx]) );
   return data;
 }
  
-void SSD1306_Mini::sendCommand(unsigned char command)
+void sendCommand(unsigned char command)
 {
-  Wire.begin();								// initialize I2C
-  Wire.beginTransmission(SlaveAddress);		// begin I2C communication
+  USI_TWI_begin();								// initialize I2C
+  USI_TWI_beginTransmission(SlaveAddress);		// begin I2C communication
 
-  Wire.send(GOFi2cOLED_Command_Mode);		// Set OLED Command mode
-  Wire.send(command);
+  USI_TWI_send(GOFi2cOLED_Command_Mode);		// Set OLED Command mode
+  USI_TWI_send(command);
 
-  Wire.endTransmission();					// End I2C communication
+  USI_TWI_endTransmission();					// End I2C communication
 }
 
-void SSD1306_Mini::sendCommand(unsigned char command1, unsigned char command2)
+void sendCommand2(unsigned char command1, unsigned char command2)
 {
-  Wire.begin();								// initialize I2C
-  Wire.beginTransmission(SlaveAddress);		// begin I2C communication
+  USI_TWI_begin();								// initialize I2C
+  USI_TWI_beginTransmission(SlaveAddress);		// begin I2C communication
 
-  Wire.send(GOFi2cOLED_Command_Mode);		// Set OLED Command mode
-  Wire.send(command1);
-  Wire.send(GOFi2cOLED_Command_Mode);		// Set OLED Command mode
-  Wire.send(command2);
+  USI_TWI_send(GOFi2cOLED_Command_Mode);		// Set OLED Command mode
+  USI_TWI_send(command1);
+  USI_TWI_send(GOFi2cOLED_Command_Mode);		// Set OLED Command mode
+  USI_TWI_send(command2);
 
-  Wire.endTransmission();					// End I2C communication
+  USI_TWI_endTransmission();					// End I2C communication
 }
 
-void SSD1306_Mini::sendData(unsigned char Data)
+/* // should be modified to be used
+void sendData(unsigned char Data)
 {
-  Wire.begin();								// initialize I2C
-  Wire.beginTransmission(SlaveAddress);		// begin I2C transmission
-  Wire.send(GOFi2cOLED_Data_Mode);			// data mode
-  Wire.send(Data);
-  Wire.endTransmission();					// stop I2C transmission
-}
+  USI_TWI_begin();								// initialize I2C
+  USI_TWI_beginTransmission(SlaveAddress);		// begin I2C transmission
+  USI_TWI_send(GOFi2cOLED_Data_Mode);			// data mode
+  USI_TWI_send(Data);
+  USI_TWI_endTransmission();					// stop I2C transmission
+}*/
 
-void SSD1306_Mini::init(uint8_t address)
+void ssd1306_init(uint8_t address)
 {
+  SlaveAddress = address;
 
-  Wire.begin();
+  USI_TWI_begin();
 
   _delay_ms(5);	//wait for OLED hardware init
   // constructor(128, 64);
@@ -76,12 +89,12 @@ void SSD1306_Mini::init(uint8_t address)
 
   sendCommand(GOFi2cOLED_Display_Off_Cmd);    /*display off*/
 
-  sendCommand(Set_Multiplex_Ratio_Cmd, 31);    /*multiplex ratio*/
+  sendCommand2(Set_Multiplex_Ratio_Cmd, 31);    /*multiplex ratio*/
 
-  sendCommand(Set_Display_Offset_Cmd, 0x00);    /*set display offset*/
+  sendCommand2(Set_Display_Offset_Cmd, 0x00);    /*set display offset*/
 
   //set horizontal addressing mode
-  sendCommand(Set_Memory_Addressing_Mode_Cmd, HORIZONTAL_MODE);
+  sendCommand2(Set_Memory_Addressing_Mode_Cmd, HORIZONTAL_MODE);
 
   sendCommand(0xB0); 	//set page address
   sendCommand(0x00); 	//set column lower address
@@ -89,7 +102,7 @@ void SSD1306_Mini::init(uint8_t address)
 
   sendCommand(0x40);    /*set display starconstructort line*/
 
-  sendCommand(Set_Contrast_Cmd, 0xcf);    /*contract control: 128*/
+  sendCommand2(Set_Contrast_Cmd, 0xcf);    /*contract control: 128*/
 
   sendCommand(Segment_Remap_Cmd);    /*set segment remap*/
 
@@ -97,49 +110,49 @@ void SSD1306_Mini::init(uint8_t address)
 
   sendCommand(GOFi2cOLED_Normal_Display_Cmd);    /*normal / reverse*/
 
-  sendCommand(Set_Display_Clock_Divide_Ratio_Cmd, 0x80);    /*set osc division*/
+  sendCommand2(Set_Display_Clock_Divide_Ratio_Cmd, 0x80);    /*set osc division*/
 
-  sendCommand(Set_Precharge_Period_Cmd, 0xf1);    /*set pre-charge period*/
+  sendCommand2(Set_Precharge_Period_Cmd, 0xf1);    /*set pre-charge period*/
 
-  sendCommand(Set_COM_Pins_Hardware_Config_Cmd, 0x02);    /*set COM pins*/
+  sendCommand2(Set_COM_Pins_Hardware_Config_Cmd, 0x02);    /*set COM pins*/
 
-  sendCommand(Set_VCOMH_Deselect_Level_Cmd, 0x30);    /*set vcomh*/
+  sendCommand2(Set_VCOMH_Deselect_Level_Cmd, 0x30);    /*set vcomh*/
 
   sendCommand(Deactivate_Scroll_Cmd);
 
-  sendCommand(Charge_Pump_Setting_Cmd, Charge_Pump_Enable_Cmd);    /*set charge pump enable*/
+  sendCommand2(Charge_Pump_Setting_Cmd, Charge_Pump_Enable_Cmd);    /*set charge pump enable*/
 
   sendCommand(GOFi2cOLED_Display_On_Cmd);    /*display ON*/
 }
 
-void SSD1306_Mini::clipArea(unsigned char col, unsigned char row, unsigned char w, unsigned char h){
+void ssd1306_clipArea(unsigned char col, unsigned char row, unsigned char w, unsigned char h){
   
-  TinyWireM.begin();                    //initialize I2C
-  TinyWireM.beginTransmission(SlaveAddress); // begin I2C transmission
-  TinyWireM.send(GOFi2cOLED_Command_Mode);            // data mode
-  TinyWireM.send(Set_Column_Address_Cmd);
-  TinyWireM.send(0);
+  USI_TWI_begin();                    //initialize I2C
+  USI_TWI_beginTransmission(SlaveAddress); // begin I2C transmission
+  USI_TWI_send(GOFi2cOLED_Command_Mode);            // data mode
+  USI_TWI_send(Set_Column_Address_Cmd);
+  USI_TWI_send(0);
 
-  TinyWireM.send(col);
-  TinyWireM.send(col+w-1);
+  USI_TWI_send(col);
+  USI_TWI_send(col+w-1);
 
-  TinyWireM.endTransmission();                    // stop I2C transmission
+  USI_TWI_endTransmission();                    // stop I2C transmission
 
-  TinyWireM.begin();                    //initialize I2C
-  TinyWireM.beginTransmission(SlaveAddress); // begin I2C transmission
-  TinyWireM.send(GOFi2cOLED_Command_Mode);            // data mode
-  TinyWireM.send(Set_Page_Address_Cmd);
-  TinyWireM.send(0);
+  USI_TWI_begin();                    //initialize I2C
+  USI_TWI_beginTransmission(SlaveAddress); // begin I2C transmission
+  USI_TWI_send(GOFi2cOLED_Command_Mode);            // data mode
+  USI_TWI_send(Set_Page_Address_Cmd);
+  USI_TWI_send(0);
 
-  TinyWireM.send(row); 
-  TinyWireM.send(row+h-1);
+  USI_TWI_send(row); 
+  USI_TWI_send(row+h-1);
 
-  TinyWireM.endTransmission();                    // stop I2C transmission
+  USI_TWI_endTransmission();                    // stop I2C transmission
 
 }
 
-void SSD1306_Mini::cursorTo(unsigned char col, unsigned char row){
-  clipArea(col, row, 128-col, 4-row);
+void ssd1306_cursorTo(unsigned char col, unsigned char row){
+  ssd1306_clipArea(col, row, 128-col, 4-row);
 /*  
   TinyWireM.begin();                    //initialize I2C
   TinyWireM.beginTransmission(SlaveAddress); // begin I2C transmission
@@ -166,7 +179,7 @@ void SSD1306_Mini::cursorTo(unsigned char col, unsigned char row){
 }
 
 /*
-void SSD1306_Mini::cursorToX( unsigned char row, unsigned char col ){
+void ssd1306_cursorToX( unsigned char row, unsigned char col ){
 
   sendCommand(0x00 | (0x0F & col) );  // low col = 0
   sendCommand(0x10 | (0x0F & (col>>4)) );  // hi col = 0
@@ -178,7 +191,7 @@ void SSD1306_Mini::cursorToX( unsigned char row, unsigned char col ){
 }
 */
 
-void SSD1306_Mini::startScreen(){
+void ssd1306_startScreen(){
   
   sendCommand(0x00 | 0x0);  // low col = 0
   sendCommand(0x10 | 0x0);  // hi col = 0
@@ -186,28 +199,28 @@ void SSD1306_Mini::startScreen(){
 
 }
 
-void SSD1306_Mini::clear() {
+void ssd1306_clear() {
   
   sendCommand(0x00 | 0x0);  // low col = 0
   sendCommand(0x10 | 0x0);  // hi col = 0
   sendCommand(0x40 | 0x0); // line #0
     
-  clipArea(0,0,128,4);
+  ssd1306_clipArea(0,0,128,4);
   
     for (uint16_t i=0; i<=((128*32/4)/16); i++) 
     {
       // send a bunch of data in one xmission
-      Wire.beginTransmission(SlaveAddress);
-      Wire.send(GOFi2cOLED_Data_Mode);            // data mode
+      USI_TWI_beginTransmission(SlaveAddress);
+      USI_TWI_send(GOFi2cOLED_Data_Mode);            // data mode
       for (uint8_t k=0;k<16;k++){
-        Wire.send( 0 );
+        USI_TWI_send( 0 );
       }
-      Wire.endTransmission();
+      USI_TWI_endTransmission();
     }
 }
 
 
-void SSD1306_Mini::displayX(int off) {
+void ssd1306_displayX(int off) {
   sendCommand(0x00 | 0x0);  // low col = 0
   sendCommand(0x10 | 0x0);  // hi col = 0
   sendCommand(0x40 | 0x0); // line #0
@@ -215,18 +228,18 @@ void SSD1306_Mini::displayX(int off) {
     for (uint16_t i=0; i<=((128*32/4)/16); i++) 
     {
       // send a bunch of data in one xmission
-      Wire.beginTransmission(SlaveAddress);
-      Wire.send(GOFi2cOLED_Data_Mode);            // data mode
+      USI_TWI_beginTransmission(SlaveAddress);
+      USI_TWI_send(GOFi2cOLED_Data_Mode);            // data mode
       for (uint8_t k=0;k<16;k++){
-        Wire.send( i*16 + k + off);
+        USI_TWI_send( i*16 + k + off);
       }
-      Wire.endTransmission();
+      USI_TWI_endTransmission();
     }
 }
 
 
 
-void SSD1306_Mini::printChar( char ch ){
+void ssd1306_printChar( char ch ){
     
     char data[5];
     unsigned char i= ch;
@@ -237,56 +250,56 @@ void SSD1306_Mini::printChar( char ch ){
     data[3]= getFlash(BasicFont, i*5 + 3);
     data[4]= getFlash(BasicFont, i*5 + 4);    
     
-    Wire.beginTransmission(SlaveAddress);
-    Wire.send(GOFi2cOLED_Data_Mode);            // data mode
+    USI_TWI_beginTransmission(SlaveAddress);
+    USI_TWI_send(GOFi2cOLED_Data_Mode);            // data mode
     
-    Wire.send( 0x00 );
-    Wire.send( data[0] );
-    Wire.send( data[1] );
-    Wire.send( data[2] );
-    Wire.send( data[3] );
-    Wire.send( data[4] );
-    Wire.send( 0x00 );
+    USI_TWI_send( 0x00 );
+    USI_TWI_send( data[0] );
+    USI_TWI_send( data[1] );
+    USI_TWI_send( data[2] );
+    USI_TWI_send( data[3] );
+    USI_TWI_send( data[4] );
+    USI_TWI_send( 0x00 );
       
-    Wire.endTransmission();
+    USI_TWI_endTransmission();
   
 }
 
-void SSD1306_Mini::printString( const char * pText ){
+void ssd1306_printString( const char * pText ){
   unsigned char i;
   unsigned char len = strlen( pText );
   
   for (i=0;i<len;i++){
-     printChar( pText[i] ); 
+     ssd1306_printChar( pText[i] ); 
   }
   
 }
 
-void SSD1306_Mini::printStringTo(uint8_t row, uint8_t col, const char *str) {
-  cursorTo(row, col);
-  printString(str);
+void ssd1306_printStringTo(uint8_t row, uint8_t col, const char *str) {
+  ssd1306_cursorTo(row, col);
+  ssd1306_printString(str);
 }
 
-void SSD1306_Mini::printNumberTo(uint8_t row, uint8_t col, int num) {
+void ssd1306_printNumberTo(uint8_t row, uint8_t col, int num) {
   char str[16];
   itoa(num, str, 10);
-  printStringTo(row, col, str);
+  ssd1306_printStringTo(row, col, str);
 }
 
 // row (horizontal): value from 0 to (128-6*lenght) in which to print data
 // col (vertical): value from 0 to 3
 // num: float number divided in two integers
 // decimal_digits: desired decimal places to print. Defaults to 1
-void SSD1306_Mini::printFloatTo(uint8_t row, uint8_t col, const ifloat32_t& num, 
+void ssd1306_printFloatTo(uint8_t row, uint8_t col, const float32_t num, 
                                 uint8_t decimal_digits) {
   char str[16] = "";
   char aux[8] = "", aux2[8] = "";
 
-  itoa(num.getInteger(), str, 10);
+  itoa(num.integer, str, 10);
 
   strcat(str, ".");
 
-  itoa(num.getDecimal(), aux, 10);
+  itoa(num.decimal, aux, 10);
 
   uint8_t decimal_len = strnlen(aux, sizeof aux - 1); // actual decimal digits
   uint8_t pad = 4 - decimal_len; // 4 is maximum expected decimal digits
@@ -300,24 +313,24 @@ void SSD1306_Mini::printFloatTo(uint8_t row, uint8_t col, const ifloat32_t& num,
 
   strncat(str, aux, decimal_digits);
 
-  printStringTo(row, col, str);  
+  ssd1306_printStringTo(row, col, str);  
 }
 
 
-void SSD1306_Mini::drawImage( const unsigned char * img, unsigned char col, unsigned char row, unsigned char w, unsigned char h ){
+void ssd1306_drawImage( const unsigned char * img, unsigned char col, unsigned char row, unsigned char w, unsigned char h ){
   unsigned int i, data;
   
-  clipArea( col, row, w, h);
+  ssd1306_clipArea( col, row, w, h);
   
   for (i=0;i< (w*h);i++){
 
       data= getFlash( img, i);
               
-      Wire.beginTransmission(SlaveAddress);
-      Wire.send(GOFi2cOLED_Data_Mode);            // data mode
+      USI_TWI_beginTransmission(SlaveAddress);
+      USI_TWI_send(GOFi2cOLED_Data_Mode);            // data mode
 
-        Wire.send( data );
-      Wire.endTransmission();
+        USI_TWI_send( data );
+      USI_TWI_endTransmission();
       
   }
   
@@ -347,7 +360,7 @@ char* itoa(int value, char* result, int base) {
     }
     return result;
 }
-
+#if 1
 // a 5x7 font table
 const unsigned char  BasicFont[] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00,
@@ -606,3 +619,107 @@ const unsigned char  BasicFont[] PROGMEM = {
 	0x00, 0x3C, 0x3C, 0x3C, 0x3C, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 
 };
+
+#else
+
+const unsigned char  BasicFont[] PROGMEM = {
+   0x00, 0x05, 0x07, 0x20,
+   0x00, 0x00, 0x00, 0x00, 0x00, // sp
+   0x00, 0x00, 0x5F, 0x00, 0x00, // !
+   0x00, 0x03, 0x00, 0x03, 0x00, // "
+   0x14, 0x3E, 0x14, 0x3E, 0x14, // #
+   0x24, 0x2A, 0x7F, 0x2A, 0x12, // $
+   0x43, 0x33, 0x08, 0x66, 0x61, // %
+   0x36, 0x49, 0x55, 0x22, 0x50, // &
+   0x00, 0x05, 0x03, 0x00, 0x00, // '
+   0x00, 0x1C, 0x22, 0x41, 0x00, // (
+   0x00, 0x41, 0x22, 0x1C, 0x00, // )
+   0x14, 0x08, 0x3E, 0x08, 0x14, // *
+   0x08, 0x08, 0x3E, 0x08, 0x08, // +
+   0x00, 0x50, 0x30, 0x00, 0x00, // ,
+   0x08, 0x08, 0x08, 0x08, 0x08, // -
+   0x00, 0x60, 0x60, 0x00, 0x00, // .
+   0x20, 0x10, 0x08, 0x04, 0x02, // /
+   0x3E, 0x51, 0x49, 0x45, 0x3E, // 0
+   0x00, 0x04, 0x02, 0x7F, 0x00, // 1
+   0x42, 0x61, 0x51, 0x49, 0x46, // 2
+   0x22, 0x41, 0x49, 0x49, 0x36, // 3
+   0x18, 0x14, 0x12, 0x7F, 0x10, // 4
+   0x27, 0x45, 0x45, 0x45, 0x39, // 5
+   0x3E, 0x49, 0x49, 0x49, 0x32, // 6
+   0x01, 0x01, 0x71, 0x09, 0x07, // 7
+   0x36, 0x49, 0x49, 0x49, 0x36, // 8
+   0x26, 0x49, 0x49, 0x49, 0x3E, // 9
+   0x00, 0x36, 0x36, 0x00, 0x00, // :
+   0x00, 0x56, 0x36, 0x00, 0x00, // ;
+   0x08, 0x14, 0x22, 0x41, 0x00, // <
+   0x14, 0x14, 0x14, 0x14, 0x14, // =
+   0x00, 0x41, 0x22, 0x14, 0x08, // >
+   0x02, 0x01, 0x51, 0x09, 0x06, // ?
+   0x3E, 0x41, 0x59, 0x55, 0x5E, // @
+   0x7E, 0x09, 0x09, 0x09, 0x7E, // A
+   0x7F, 0x49, 0x49, 0x49, 0x36, // B
+   0x3E, 0x41, 0x41, 0x41, 0x22, // C
+   0x7F, 0x41, 0x41, 0x41, 0x3E, // D
+   0x7F, 0x49, 0x49, 0x49, 0x41, // E
+   0x7F, 0x09, 0x09, 0x09, 0x01, // F
+   0x3E, 0x41, 0x41, 0x49, 0x3A, // G
+   0x7F, 0x08, 0x08, 0x08, 0x7F, // H
+   0x00, 0x41, 0x7F, 0x41, 0x00, // I
+   0x30, 0x40, 0x40, 0x40, 0x3F, // J
+   0x7F, 0x08, 0x14, 0x22, 0x41, // K
+   0x7F, 0x40, 0x40, 0x40, 0x40, // L
+   0x7F, 0x02, 0x0C, 0x02, 0x7F, // M
+   0x7F, 0x02, 0x04, 0x08, 0x7F, // N
+   0x3E, 0x41, 0x41, 0x41, 0x3E, // O
+   0x7F, 0x09, 0x09, 0x09, 0x06, // P
+   0x1E, 0x21, 0x21, 0x21, 0x5E, // Q
+   0x7F, 0x09, 0x09, 0x09, 0x76, // R
+   0x26, 0x49, 0x49, 0x49, 0x32, // S
+   0x01, 0x01, 0x7F, 0x01, 0x01, // T
+   0x3F, 0x40, 0x40, 0x40, 0x3F, // U
+   0x1F, 0x20, 0x40, 0x20, 0x1F, // V
+   0x7F, 0x20, 0x10, 0x20, 0x7F, // W
+   0x41, 0x22, 0x1C, 0x22, 0x41, // X
+   0x07, 0x08, 0x70, 0x08, 0x07, // Y
+   0x61, 0x51, 0x49, 0x45, 0x43, // Z
+   0x00, 0x7F, 0x41, 0x00, 0x00, // [
+   0x02, 0x04, 0x08, 0x10, 0x20, // 55
+   0x00, 0x00, 0x41, 0x7F, 0x00, // ]
+   0x04, 0x02, 0x01, 0x02, 0x04, // ^
+   0x40, 0x40, 0x40, 0x40, 0x40, // _
+   0x00, 0x01, 0x02, 0x04, 0x00, // `
+   0x20, 0x54, 0x54, 0x54, 0x78, // a
+   0x7F, 0x44, 0x44, 0x44, 0x38, // b
+   0x38, 0x44, 0x44, 0x44, 0x44, // c
+   0x38, 0x44, 0x44, 0x44, 0x7F, // d
+   0x38, 0x54, 0x54, 0x54, 0x18, // e
+   0x04, 0x04, 0x7E, 0x05, 0x05, // f
+   0x08, 0x54, 0x54, 0x54, 0x3C, // g
+   0x7F, 0x08, 0x04, 0x04, 0x78, // h
+   0x00, 0x44, 0x7D, 0x40, 0x00, // i
+   0x20, 0x40, 0x44, 0x3D, 0x00, // j
+   0x7F, 0x10, 0x28, 0x44, 0x00, // k
+   0x00, 0x41, 0x7F, 0x40, 0x00, // l
+   0x7C, 0x04, 0x78, 0x04, 0x78, // m
+   0x7C, 0x08, 0x04, 0x04, 0x78, // n
+   0x38, 0x44, 0x44, 0x44, 0x38, // o
+   0x7C, 0x14, 0x14, 0x14, 0x08, // p
+   0x08, 0x14, 0x14, 0x14, 0x7C, // q
+   0x00, 0x7C, 0x08, 0x04, 0x04, // r
+   0x48, 0x54, 0x54, 0x54, 0x20, // s
+   0x04, 0x04, 0x3F, 0x44, 0x44, // t
+   0x3C, 0x40, 0x40, 0x20, 0x7C, // u
+   0x1C, 0x20, 0x40, 0x20, 0x1C, // v
+   0x3C, 0x40, 0x30, 0x40, 0x3C, // w
+   0x44, 0x28, 0x10, 0x28, 0x44, // x
+   0x0C, 0x50, 0x50, 0x50, 0x3C, // y
+   0x44, 0x64, 0x54, 0x4C, 0x44, // z
+   0x00, 0x08, 0x36, 0x41, 0x41, // {
+   0x00, 0x00, 0x7F, 0x00, 0x00, // |
+   0x41, 0x41, 0x36, 0x08, 0x00, // }
+   0x02, 0x01, 0x02, 0x04, 0x02, // ~
+   0x14, 0x14, 0x14, 0x14, 0x14, // horiz lines // DEL
+   0x00 /* This byte is required for italic type of font */
+};
+#endif

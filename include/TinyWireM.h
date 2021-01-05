@@ -42,26 +42,26 @@
 #define USI_RCVE         1              // indicates receiving from TWI
 #define USI_BUF_SIZE    20              // bytes in message buffer
 
-class USI_TWI
-{
-  private:
-	static uint8_t USI_Buf[];           // holds I2C send and receive data
-	static uint8_t USI_BufIdx;          // current number of bytes in the send buff
-	static uint8_t USI_LastRead;        // number of bytes read so far
-	static uint8_t USI_BytesAvail;      // number of bytes requested but not read
+//class USI_TWI
+//{
+//  private:
+//	static uint8_t USI_Buf[];           // holds I2C send and receive data
+//	static uint8_t USI_BufIdx;          // current number of bytes in the send buff
+//	static uint8_t USI_LastRead;        // number of bytes read so far
+//	static uint8_t USI_BytesAvail;      // number of bytes requested but not read
 	
-  public:
- 	USI_TWI();
-	void begin();
-	void beginTransmission(uint8_t);
-	void send(uint8_t);
-	uint8_t endTransmission();
-	uint8_t requestFrom(uint8_t, uint8_t);
-	uint8_t receive(); 
-	uint8_t available(); 
-};
+ // public:
+// 	USI_TWI();
+	void    USI_TWI_begin();
+	void    USI_TWI_beginTransmission(uint8_t);
+	void    USI_TWI_send(uint8_t);
+	uint8_t USI_TWI_endTransmission();
+	uint8_t USI_TWI_requestFrom(uint8_t, uint8_t);
+	uint8_t USI_TWI_receive(); 
+	uint8_t USI_TWI_available(); 
+//};
 
-extern USI_TWI TinyWireM;
+//extern USI_TWI TinyWireM;
 
 #endif
 

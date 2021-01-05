@@ -43,6 +43,11 @@ typedef union {
 		uint8_t temp_dec;
 		uint8_t checksum;
 	};
+	struct {
+		uint16_t h;
+		uint16_t t;
+		uint8_t c;
+	};
 } TinuDHT;
 
 // ----------------------------------------------------------------------------

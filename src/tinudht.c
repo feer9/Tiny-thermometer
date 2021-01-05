@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <string.h>
 
 #include "tinudht.h"
 
@@ -37,6 +38,8 @@
 
 uint8_t tinudht_read(TinuDHT *ptinudht, uint8_t dht_pin) {
 	uint8_t timeout;
+
+	memset(ptinudht->data, 0xff, sizeof ptinudht->data);
 
 	// Send request to DHT11
 	DDRB |= (1 << dht_pin);	// Set port as output

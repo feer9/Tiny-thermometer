@@ -42,10 +42,9 @@
 #define DS18B20_MUL 16 //!< Temperature multiplier (so we don't need floats)
 
 #ifdef __cplusplus
-#include "ifloat32_t.h"
-//extern "C"
-//{
-//#endif
+extern "C"
+{
+#endif
 
 /**
 	\brief Calculate 8-bit Maxim/Dallas CRC of provided data
@@ -94,7 +93,7 @@ extern uint8_t ds18b20convert( volatile uint8_t *port, volatile uint8_t *directi
 	\note This method only works with an external power supply.
 */
 extern uint8_t ds18b20convert_read( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, 
-									uint8_t mask, uint8_t *rom, ifloat32_t& temperature );
+									uint8_t mask, uint8_t *rom, float32_t *temperature );
 
 /**
 	\brief Reads scratchpad from DS18B20 sensor
@@ -151,7 +150,7 @@ extern uint8_t ds18b20csp( volatile uint8_t *port, volatile uint8_t *direction, 
 
 	\note If provided ROM address pointer is NULL, ROM matching operation is skipped.
 */
-extern uint8_t ds18b20read( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t *rom, ifloat32_t& temperature ) ;
+extern uint8_t ds18b20read( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t *rom, float32_t *temperature ) ;
 
 /**
 	\brief Reads DS18B20 sensor's ROM address
@@ -167,8 +166,8 @@ extern uint8_t ds18b20read( volatile uint8_t *port, volatile uint8_t *direction,
 */
 extern uint8_t ds18b20rom( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t *rom );
 
-//#ifdef __cplusplus
-//}
+#ifdef __cplusplus
+}
 #endif
 	
 #endif
