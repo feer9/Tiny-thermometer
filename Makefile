@@ -6,6 +6,7 @@ CLOCK       = 8000000
 PROGRAMMER  = usbasp-clone
 
 HEADERS    := $(wildcard include/*.h include/**/*.h)
+SOURCES    := $(wildcard src/*.c)
 CSOURCES   := tinudht.c timer.c onewire.c romsearch.c USI_TWI_Master.c ds18b20.c SSD1306_minimal.c TinyWireM.c main.c
 CXXSOURCES := 
 COBJECTS   := $(CSOURCES:%.c=obj/%.o)
@@ -18,18 +19,19 @@ OBJECTS    := $(COBJECTS) $(CXXOBJECTS)
 FUSES_DEFAULT = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m 
 FUSES_8MHZ    = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
 FUSES_16MHZ   = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m 
-FUSES         = $(FUSES_8MHZ)
+FUSES        := $(FUSES_8MHZ)
 
 # Tune the lines below only if you know what you are doing:
 AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B1
 CC = avr-gcc
 CXX = avr-g++
-CFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
+CFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu99 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
 CXXFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -fno-threadsafe-statics
-COMPILE = $(CXX) $(CFLAGS)
+LDFLAGS = -Wl,--relax -Wl,--gc-sections
+COMPILE = $(CC) $(CFLAGS) $(LDFLAGS)
 
 # symbolic targets:
-all:	main.hex   ; 
+all: disasm ;
 #	$(info $$CSOURCES is [${CSOURCES}]) 
 #	$(info $$CXXSOURCES is [${CXXSOURCES}])
 #	$(info $$OBJECTS is [${OBJECTS}])
@@ -75,8 +77,16 @@ main.hex: main.elf
 # EEPROM and add it to the "flash" target.
 
 # Targets for code debugging and analysis:
-disasm:	main.elf
-	avr-objdump -d main.elf
+disasm:	main.hex
+	avr-objdump -d main.elf > disasm.s
 
 cpp:
 	$(COMPILE) -E main.c 
+
+# doesn't work with avr-gcc 10.2.0
+whole: $(SOURCES) $(HEADERS) Makefile
+	$(CC) $(CFLAGS) --combine -fwhole-program $(LDFLAGS) -o main.elf $(SOURCES)
+	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
+	avr-size --format=avr --mcu=$(DEVICE) main.elf
+
+# https://p5r.uk/blog/2008/avr-gcc-optimisations.html
