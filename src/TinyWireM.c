@@ -26,7 +26,7 @@ extern "C" {
 #include "TinyWireM.h"
 #include <stdbool.h>
 
-// Initialize Class Variables //////////////////////////////////////////////////
+// Initialize local Variables //////////////////////////////////////////////////
 static	uint8_t USI_Buf[USI_BUF_SIZE];             // holds I2C send and receive data
 static	uint8_t USI_BufIdx = 0;                    // current number of bytes in the send buff
 static	uint8_t USI_LastRead = 0;                  // number of bytes read so far

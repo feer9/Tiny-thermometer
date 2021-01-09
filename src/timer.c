@@ -5,7 +5,7 @@ static volatile uint32_t tick = 0;
 
 void Timer0_init(void)
 {
-    // Timer0 interrupt at 1 KHz
+    // Timer0 interrupt at 1000 Hz (1 ms)
 
     cli();								// Stop interrupts
 
