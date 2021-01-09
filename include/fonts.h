@@ -23,9 +23,9 @@ typedef struct {
 } fontSettings;
 
 // Fonts
-extern const PROGMEM uint8_t ssd1306xled_font5x7_AB[];
-extern const PROGMEM uint8_t comic_sans_font24x32_123[];
-extern const PROGMEM uint8_t ssd1306xled_font8x16[];
-extern const PROGMEM uint8_t CantarellExtraBold_12x16[];
+extern const uint8_t ssd1306xled_font5x7_AB[] PROGMEM;
+extern const uint8_t comic_sans_font24x32_123[] PROGMEM;
+extern const uint8_t ssd1306xled_font8x16[] PROGMEM;
+extern const uint8_t CantarellExtraBold_12x16[] PROGMEM;
 
 #endif // _FONTS_H

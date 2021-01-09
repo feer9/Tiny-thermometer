@@ -1,5 +1,2 @@
 obj
-*.hex
-*.elf
-*.bin
 disasm.s

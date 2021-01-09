@@ -25,7 +25,7 @@ FUSES        := $(FUSES_8MHZ)
 AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B1
 CC = avr-gcc
 CXX = avr-g++
-CFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu99 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
+CFLAGS = -Wall -O2 -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu99 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
 CXXFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -fno-threadsafe-statics
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 COMPILE = $(CC) $(CFLAGS) $(LDFLAGS)
@@ -39,6 +39,9 @@ all: disasm ;
 
 obj:
 	mkdir -p obj
+
+bin:
+	mkdir -p bin
 
 $(COBJECTS): obj/%.o: src/%.c Makefile $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -62,31 +65,31 @@ fuse:
 install: fuse flash
 
 clean:
-	rm -rf main.hex main.elf $(OBJECTS) obj
+	rm -rf bin/main.hex bin/main.elf $(OBJECTS) obj bin
 
 
 # file targets:
-main.elf: obj $(OBJECTS) $(HEADERS) Makefile
-	$(COMPILE) -o main.elf $(OBJECTS)
+bin/main.elf: bin obj $(OBJECTS) $(HEADERS) Makefile
+	$(COMPILE) -o bin/main.elf $(OBJECTS)
 
-main.hex: main.elf
-	rm -f main.hex
-	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	avr-size --format=avr --mcu=$(DEVICE) main.elf
+bin/main.hex: bin/main.elf
+	rm -f bin/main.hex
+	avr-objcopy -j .text -j .data -O ihex bin/main.elf bin/main.hex
+	avr-size --format=avr --mcu=$(DEVICE) bin/main.elf
 # If you have an EEPROM section, you must also create a hex file for the
 # EEPROM and add it to the "flash" target.
 
 # Targets for code debugging and analysis:
-disasm:	main.hex
-	avr-objdump -d main.elf > disasm.s
+disasm:	bin/main.hex
+	avr-objdump -d bin/main.elf > disasm.s
 
 cpp:
 	$(COMPILE) -E main.c 
 
 # doesn't work with avr-gcc 10.2.0
 whole: $(SOURCES) $(HEADERS) Makefile
-	$(CC) $(CFLAGS) --combine -fwhole-program $(LDFLAGS) -o main.elf $(SOURCES)
-	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	avr-size --format=avr --mcu=$(DEVICE) main.elf
+	$(CC) $(CFLAGS) --combine -fwhole-program $(LDFLAGS) -o bin/main.elf $(SOURCES)
+	avr-objcopy -j .text -j .data -O ihex bin/main.elf bin/main.hex
+	avr-size --format=avr --mcu=$(DEVICE) bin/main.elf
 
 # https://p5r.uk/blog/2008/avr-gcc-optimisations.html
