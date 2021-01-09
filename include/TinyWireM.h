@@ -52,13 +52,13 @@
 	
  // public:
 // 	USI_TWI();
-	void    USI_TWI_begin();
+	void    USI_TWI_begin(void);
 	void    USI_TWI_beginTransmission(uint8_t);
 	void    USI_TWI_send(uint8_t);
-	uint8_t USI_TWI_endTransmission();
+	uint8_t USI_TWI_endTransmission(void);
 	uint8_t USI_TWI_requestFrom(uint8_t, uint8_t);
-	uint8_t USI_TWI_receive(); 
-	uint8_t USI_TWI_available(); 
+	uint8_t USI_TWI_receive(void); 
+	uint8_t USI_TWI_available(void); 
 //};
 
 //extern USI_TWI TinyWireM;

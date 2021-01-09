@@ -33,6 +33,7 @@
 #include <avr/pgmspace.h>
 #include <string.h>
 #include "utils.h"
+#include "fonts.h"
 
 // config
 #define ssd1306_address 0x3c
@@ -106,53 +107,61 @@
 #define Dummy_Byte_0x00                       0x00
 #define Dummy_Byte_0xFF                       0xFF
 
+// not used
+typedef struct {
+	const uint8_t *data;
+	uint16_t width;
+	uint16_t height;
+	uint8_t dataSize;
+} tImage;
 
+typedef struct {
+  uint8_t width;
+  uint8_t height;
+  uint8_t data;
+} bitmap_t;
+    
+// call this function once in "void setup()" to initiallize the display
+void ssd1306_init(uint8_t address);
 
-//class SSD1306_Mini {
+// reset clipArea to maximum and clear the display
+void ssd1306_clear(void);
+
+// move cursor to upper left corner in current clipArea
+void ssd1306_startScreen(void);
+
+// set the clipArea, by default (0,0,128,8)
+void ssd1306_clipArea(unsigned char col, unsigned char row, unsigned char w, unsigned char h);
+
+// move the cursor to a location (similar to clipArea)
+void ssd1306_cursorTo( unsigned char row, unsigned char col );
+
+// print a single character
+void ssd1306_printChar( char ch );
+
+// print a string to the screen
+void ssd1306_printString(uint8_t col, uint8_t row, const char * pText);
+
+// print a string to the screen in a given position
+void ssd1306_printStringTo(uint8_t row, uint8_t col, const char *str);
+
+// print a number to the screen in a given position
+void ssd1306_printNumberTo(uint8_t row, uint8_t col, int num);
+
+// print a floating point number to the screen in a given position
+void ssd1306_printFloatTo(uint8_t row, uint8_t col, const float32_t num, 
+                          uint8_t decimal_digits, uint8_t min_len);
+
+// draw a bitmap into a given x,y position
+void ssd1306_drawImage( const uint8_t * _bitmap, unsigned char col, unsigned char row );
   
-//  public:
-    
-    // call this function once in "void setup()" to initiallize the display
-    void ssd1306_init(uint8_t address);
+//  
+void ssd1306_displayX(int off);
   
-    // reset clipArea to maximum and clear the display
-    void ssd1306_clear();
-    
-    // move cursor to upper left corner in current clipArea
-    void ssd1306_startScreen();
-    
-    // set the clipArea, by default (0,0,128,8)
-    void ssd1306_clipArea(unsigned char col, unsigned char row, unsigned char w, unsigned char h);
-
-    // move the cursor to a location (similar to clipArea)
-    void ssd1306_cursorTo( unsigned char row, unsigned char col );
-
-    // print a single character
-    void ssd1306_printChar( char ch );
-
-    // print a string to the screen
-    void ssd1306_printString( const char * pText );
-
-    // print a string to the screen in a given position
-    void ssd1306_printStringTo(uint8_t row, uint8_t col, const char *str);
-
-    // print a number to the screen in a given position
-    void ssd1306_printNumberTo(uint8_t row, uint8_t col, int num);
-
-    // print a floating point number to the screen in a given position
-    void ssd1306_printFloatTo(uint8_t row, uint8_t col, const float32_t num, 
-                       uint8_t decimal_digits);
-    
-    // draw an image with defined x,y position and width,height definition
-    void ssd1306_drawImage( const unsigned char * img, unsigned char col, unsigned char row, 
-                    unsigned char w, unsigned char h );
-      
-    //  
-    void ssd1306_displayX(int off);
-  
-//  private:
-
-//};
+void ssd1306_printChar_24x32(char c);
+void ssd1306_printString_24x32(uint8_t col, const char * pText);
+void ssd1306_setFont(const uint8_t *_f);
+int  ssd1306_getFontWidth(void);
 
 char* itoa(int value, char* result, int base);
 

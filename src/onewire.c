@@ -54,6 +54,7 @@ uint8_t onewireInit( volatile uint8_t *port, volatile uint8_t *direction, volati
 //! Sends a single bit over the 1wire bus
 uint8_t onewireWriteBit( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t bit )
 {
+	(void) portin;
 	uint8_t sreg = SREG;
 
 	#ifdef ONEWIRE_AUTO_CLI

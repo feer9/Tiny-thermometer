@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#define FIX_POINTER(_ptr) __asm__ __volatile__("" : "=b" (_ptr) : "0" (_ptr))
+
 #define pin_set(n)    (PORTB |=  (1U << (n)))
 #define pin_clear(n)  (PORTB &= ~(1U << (n)))
 
@@ -34,11 +36,13 @@ extern "C" {
 #define BitCheck(  x, y)			( ((x) >> (y)) & 1UL    )
 
 
+#define delay(x) _delay_ms(x)
 //#define dbg(s) print("dbg: "s)
 //#define dbgstr(s) println(s)
 
 // ATtiny led on PB1
 #define tiny_led  PB1
+#define LED_PIN  tiny_led
 
 //----- DHT Configuration ----------------------//
 #define DHT_Type	DHT11      //DHT11 or DHT22
@@ -48,6 +52,7 @@ extern "C" {
 
 // ds18b20 pin
 #define DS18B20_PIN PB4
+#define DS18B20_pinMask (1U << DS18B20_PIN)
 
 // Software Serial Pins
 #define RX          PB0
@@ -58,21 +63,21 @@ extern "C" {
 #define SCL         PB2
 
 
-#define UNITS_POSITION 104 
-#define OLED_CHAR_WIDTH 6
-#define _ERR_MSG "ERR     "
-
 
 typedef union {
-    uint32_t data;
-    struct {
-    int16_t integer;
-    int16_t decimal;
-    };
- } float32_t;
+	uint32_t data;
+	struct {
+	int16_t integer;
+	int16_t decimal;
+	};
+} float32_t;
 
-void Timer0_init(void);
+
 uint32_t get_tick(void);
+
+static inline int min(int a, int b) { return a<b ? a : b; }
+static inline int max(int a, int b) { return a>b ? a : b; }
+
 
 #ifdef __cplusplus
 }
