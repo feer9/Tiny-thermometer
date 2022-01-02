@@ -11,6 +11,8 @@ PB4:
 PB5: Reset
 */
 
+// TODO: brown-out detection
+// TODO: ensure lowest frequency to reduce consumption
 
 static uint32_t tick = 0;
 
@@ -155,11 +157,22 @@ void setup(void)
   Timer0_init();
 
   // Power management
-  ACSR = _BV(ACD);                 // Turn off Analog Comparator
-  PRR  = _BV(PRTIM1) | _BV(PRADC); // Shut down Timer1 and ADC
+  ACSR = (1 << ACD);                   // Turn off Analog Comparator
+  PRR  = (1 << PRTIM1) | (1 << PRADC); // Shut down Timer1 and ADC
 
-  // todo: turn on interruption on BUTTON_PIN
+  // Turn on external interrupts on BUTTON_PIN
+  //  BUTTON_PIN = PB1 = PCINT1
+  GIMSK = (1 << PCIE);    // Turn on Pin Change Interrupt Enable on General Interrupt Mask Register
+  PCMSK |= (1 << PCINT1); // Enable Pin Change Interrupt on I/O pin 1
+
+  sei(); // Enable Global Interrupt
 }
+
+ISR(PCINT0_vect)
+{
+
+}
+
 
 static volatile uint8_t button_st = BUTTON_RELEASED;
 static uint32_t activity = 0;
@@ -191,9 +204,9 @@ void buttonLongPressed(void)
   else {
     screen_st = SCREEN_OFF;
     ssd1306_off();
-  //  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // todo: ACTIVATE EXTERNAL INTERRUPT FIRST
+/*  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // todo: TEST EXTERNAL INTERRUPT FIRST
     // Sleep until a timer interrupt
-  //  sleep_mode();
+    sleep_mode(); */
   }
 }
 
@@ -252,6 +265,8 @@ void loop(void)
   set_sleep_mode(SLEEP_MODE_IDLE);
   // Sleep until a timer interrupt
   sleep_mode();
+  // todo: avoid the use of 1 ms interrupts to be able to IDLE for more time
+  //       maybe 50 ms?
 
   // todo: put to deep sleep after X minutes of the device running without user interaction.
   //       turn off OLED before going to sleep
@@ -293,4 +308,16 @@ void test_ds18b20(void)
     ssd1306_printFloatTo (40, PAGE2, f, 1, 5);
     _delay_ms(2000);
 
+}
+
+#include <avr/wdt.h>
+void WDT_off(void)
+{
+  wdt_reset();
+  /* Clear WDRF in MCUSR */
+  MCUSR = 0x00;
+  /* Write logical one to WDCE and WDE */
+  WDTCR |= (1<<WDCE) | (1<<WDE);
+  /* Turn off WDT */
+  WDTCR = 0x00;
 }
