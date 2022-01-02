@@ -71,7 +71,7 @@ void loop_dht11(bool force_update)
 
   if(tick > T_dht11 || force_update) { // update dht11
     T_dht11 = tick+1500;
-    pin_set(tiny_led);
+//    pin_set(tiny_led);
 
     // Read DHT11 data
     tinudht.status = tinudht_read(&tinudht.current, TINUDHT_PIN);
@@ -100,7 +100,7 @@ void loop_dht11(bool force_update)
     }
     tinudht.last = tinudht.current;
 
-    pin_clear(tiny_led);
+//    pin_clear(tiny_led);
   }
 
   fsm_thermomether();
@@ -113,7 +113,7 @@ void loop_ds18b20(bool force_update)
 
   if(tick > T_ds18b20 || force_update) { // update ds18b20
     T_ds18b20 = tick+250;
-    pin_set(tiny_led); 
+//    pin_set(tiny_led); 
     
     // Read ds18b20 data
     ds18b20.status = ds18b20convert_read( &PORTB, &DDRB, &PINB, DS18B20_pinMask, NULL, &ds18b20.current );
@@ -128,7 +128,7 @@ void loop_ds18b20(bool force_update)
       ssd1306_printString(40+5*ssd1306_getFontWidth(), PAGE2, DEG);
     }
 
-    pin_clear(tiny_led);
+//    pin_clear(tiny_led);
   }
 }
 
@@ -139,8 +139,10 @@ void drawRaindrop(void)
 
 void setup(void)
 {
-  pinmode_output(LED_PIN);
-  pin_clear(LED_PIN);
+//  pinmode_output(LED_PIN);
+//  pin_clear(LED_PIN);
+  pinmode_input(BUTTON_PIN);
+  pinmode_pullup_off(BUTTON_PIN);
 
   // Init OLED Display
   ssd1306_init(ssd1306_address);
@@ -155,41 +157,112 @@ void setup(void)
   // Power management
   ACSR = _BV(ACD);                 // Turn off Analog Comparator
   PRR  = _BV(PRTIM1) | _BV(PRADC); // Shut down Timer1 and ADC
+
+  // todo: turn on interruption on BUTTON_PIN
+}
+
+static volatile uint8_t button_st = BUTTON_RELEASED;
+static uint32_t activity = 0;
+
+typedef enum {SCREEN_OFF, SCREEN_DHT11, SCREEN_DS18B20, SCREEN_MAX};
+static uint8_t screen_st = SCREEN_OFF;
+
+void buttonSimpleAction(void)
+{
+  if(++screen_st == SCREEN_MAX) screen_st = SCREEN_DHT11;
+
+  switch(screen_st) {
+  case SCREEN_DHT11: default:
+      prepareDisplay_dht11();
+      break;
+  case SCREEN_DS18B20:
+      prepareDisplay_ds18b20();
+      break;
+  }
+}
+
+void buttonLongPressed(void)
+{
+  if(screen_st == SCREEN_OFF) {
+    screen_st = SCREEN_DHT11;
+    prepareDisplay_dht11();
+    ssd1306_on();
+  }
+  else {
+    screen_st = SCREEN_OFF;
+    ssd1306_off();
+  //  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // todo: ACTIVATE EXTERNAL INTERRUPT FIRST
+    // Sleep until a timer interrupt
+  //  sleep_mode();
+  }
+}
+
+// Basic debounce function based on an Arduino example
+void readButton(void)
+{
+  static uint32_t debounce = 0;     // time in which the last state change happened
+  static uint32_t elapsed = 0;      // time elapsed since last state change
+  static uint8_t last = 1U;
+  static bool longpressed = false;
+  uint8_t val = pin_get(BUTTON_PIN);
+
+  // If the switch changed, due to noise or pressing:
+  if(val != last) {
+    // reset the debouncing timer
+    debounce = tick;
+  }
+
+  elapsed = tick-debounce;
+  if(elapsed > DEBOUNCE_DELAY) {
+    // whatever the reading is at, it's been there for longer than the debounce
+    // delay, so take it as the actual current state:
+
+    // if the button state has changed:
+    if(val != button_st) {
+      button_st   = val;
+      longpressed = false;
+      activity    = tick;
+
+      if(val == BUTTON_RELEASED && elapsed < LONG_PRESS_TIME) {
+        buttonSimpleAction();
+      }
+    }
+    else if(val == BUTTON_PRESSED && !longpressed && elapsed >= LONG_PRESS_TIME) {
+      longpressed = true;
+      buttonLongPressed();
+    }
+  }
+
+  last = val;
 }
 
 void loop(void)
 {
-  static uint8_t st = 1;
-  static uint32_t change = 0;
   tick = get_tick();
 
-  if(tick >= change) {
-    change = tick + 5000;
-    st ^= 0x01;
-    if(st)
-      prepareDisplay_dht11();
-    else
-      prepareDisplay_ds18b20();
-  }
+  readButton();
 
-  if(st) {
+  if(screen_st == SCREEN_DHT11) {
     loop_dht11(0);
   }
-  else {
+  else if (screen_st == SCREEN_DS18B20) {
     loop_ds18b20(0);
   }
   // Set sleep mode to IDLE, this allows TIMER/COUNTER0 to keep running
   set_sleep_mode(SLEEP_MODE_IDLE);
   // Sleep until a timer interrupt
   sleep_mode();
+
+  // todo: put to deep sleep after X minutes of the device running without user interaction.
+  //       turn off OLED before going to sleep
 }
 
 void main (void)
 {
   setup();
-  
+
   for(;;)
-    loop(); 
+    loop();
 }
 
 void test_ds18b20(void)

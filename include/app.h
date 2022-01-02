@@ -24,6 +24,12 @@ extern "C" {
 #define PAGE3 (2 * PAGE_HEIGHT)
 #define PAGE4 (3 * PAGE_HEIGHT)
 
+// button has pull-up resistor
+#define BUTTON_PRESSED  0U
+#define BUTTON_RELEASED 1U
+
+#define DEBOUNCE_DELAY 50
+#define LONG_PRESS_TIME 1000
 
 typedef struct {
 	TinuDHT current;

@@ -43,6 +43,7 @@ extern "C" {
 // ATtiny led on PB1
 #define tiny_led  PB1
 #define LED_PIN  tiny_led
+#define BUTTON_PIN PB1
 
 //----- DHT Configuration ----------------------//
 #define DHT_Type	DHT11      //DHT11 or DHT22
