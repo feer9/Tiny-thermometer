@@ -32,10 +32,10 @@ static fontSettings currentFont = { 0 };
 //// Private Functions
 static void sendCommand(uint8_t command);
 static void sendCommand2(uint8_t command1, uint8_t command2);
-//static void sendData(const uint8_t *data, uint8_t len);
+/*static*/ void sendData(const uint8_t *data, uint8_t len);
 static void sendFlashData(const uint8_t *data, uint16_t len);
-  
-static unsigned char getFlash( const unsigned char * mem, unsigned int idx  );
+
+static uint8_t getFlash( const unsigned char * mem, unsigned int idx  );
 //// End Private Functions
 
 
@@ -91,7 +91,7 @@ void sendData(const uint8_t *data, uint8_t len) {
     USI_TWI_send(*data++);
   }
 
-  USI_TWI_endTransmission();               // End I2C communication
+  USI_TWI_endTransmission();
 }
 
 void sendFlashData(const uint8_t *data, uint16_t len) {
@@ -112,6 +112,14 @@ void sendFlashData(const uint8_t *data, uint16_t len) {
   }
   
   USI_TWI_endTransmission();  
+}
+
+inline void ssd1306_off(void) {
+  sendCommand(GOFi2cOLED_Display_Off_Cmd);
+}
+
+inline void ssd1306_on(void) {
+  sendCommand(GOFi2cOLED_Display_On_Cmd);
 }
 
 void ssd1306_init(uint8_t address) {
@@ -219,11 +227,12 @@ void ssd1306_clear() {
     
   ssd1306_clipArea(0,0,128,4);
   
-  for (uint16_t i=0; i<=((128*32/8)/16); i++) 
+  
+  for (uint16_t i=0; i<=((128*32/8)/16); i++) // package size = 16
   {
     // send a bunch of data in one xmission
     USI_TWI_beginTransmission(SlaveAddress);
-    USI_TWI_send(GOFi2cOLED_Data_Mode);            // data mode
+    USI_TWI_send(GOFi2cOLED_Data_Mode);
     for (uint8_t k=0;k<16;k++){
       USI_TWI_send( 0 );
     }
@@ -231,22 +240,22 @@ void ssd1306_clear() {
   }
 }
 
-
+/*
 void ssd1306_displayX(int off) {
 
   ssd1306_startScreen();
     
-  for (uint16_t i=0; i<=((128*32/4)/16); i++) 
+  for (uint16_t i=0; i<=((128*32/8)/16); i++) 
   {
     // send a bunch of data in one xmission
     USI_TWI_beginTransmission(SlaveAddress);
-    USI_TWI_send(GOFi2cOLED_Data_Mode);            // data mode
+    USI_TWI_send(GOFi2cOLED_Data_Mode);
     for (uint8_t k=0;k<16;k++){
       USI_TWI_send( i*16 + k + off);
     }
     USI_TWI_endTransmission();
   }
-}
+}*/
 
 
 int ssd1306_getFontWidth(void) {

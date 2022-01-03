@@ -163,6 +163,9 @@ void ssd1306_printString_24x32(uint8_t col, const char * pText);
 void ssd1306_setFont(const uint8_t *_f);
 int  ssd1306_getFontWidth(void);
 
+void ssd1306_off(void);
+void ssd1306_on (void);
+
 char* itoa(int value, char* result, int base);
 
 #endif
