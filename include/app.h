@@ -25,8 +25,13 @@ extern "C" {
 #define PAGE4 (3 * PAGE_HEIGHT)
 
 // button has pull-up resistor
-#define BUTTON_PRESSED  0U
-#define BUTTON_RELEASED 1U
+//#define BUTTON_PRESSED  0U
+//#define BUTTON_RELEASED 1U
+
+/* PULL-DOWN TEMPORAL */
+#define BUTTON_PRESSED  1U
+#define BUTTON_RELEASED 0U
+
 
 #define DEBOUNCE_DELAY 50
 #define LONG_PRESS_TIME 1000
@@ -47,14 +52,14 @@ typedef struct {
 void main(void) __attribute__ ((noreturn));
 void setup(void);
 void loop(void);
-static void prepareDisplay_dht11(void);
-static void prepareDisplay_ds18b20(void);
-static void drawRaindrop(void);
+void prepareDisplay_dht11(void);
+void prepareDisplay_ds18b20(void);
+void drawRaindrop(void);
 void Timer0_init(void);
 void loop_dht11(bool force_update);
 void loop_ds18b20(bool force_update);
 void fsm_thermomether(void);
-
+void readButton(void);
 
 // byte array of bitmap 10x32px
 static const uint8_t  img_thermometer_cold[] PROGMEM = {

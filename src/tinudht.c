@@ -36,6 +36,11 @@
 
 // ----------------------------------------------------------------------------
 
+void tinudht_init(void) {
+	// Delay for DHT11 to stabilize (REQUIRED on power on)
+	_delay_ms(200);
+}
+
 uint8_t tinudht_read(TinuDHT *ptinudht, uint8_t dht_pin) {
 	uint8_t timeout;
 

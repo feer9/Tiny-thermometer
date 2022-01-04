@@ -28,12 +28,12 @@ void Timer0_init(void)
 #else
 #error Invalid F_CPU value
 #endif
-    
+
     TCCR0A |= (1<<WGM01);				// Turn on CTC mode
     TIMSK |=  (1<<OCIE0A);				// Enable Timer Compare Interrupt
 	GTCCR &= ~(1<<TSM);					// Start the Timer/Counter0
 
-	sei();								// Allow interrupts
+    // This function doesn't enable the ISR. sei() must be called later on.
 }
 
 
