@@ -36,9 +36,13 @@
 
 // ----------------------------------------------------------------------------
 
-void tinudht_init(void) {
+void tinudht_init(uint8_t pin) {
 	// Delay for DHT11 to stabilize (REQUIRED on power on)
 	_delay_ms(200);
+
+	// Make a dummy read to start the sensor
+	TinuDHT dummy;
+	tinudht_read(&dummy, pin);
 }
 
 uint8_t tinudht_read(TinuDHT *ptinudht, uint8_t dht_pin) {

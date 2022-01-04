@@ -52,7 +52,7 @@ typedef union {
 
 // ----------------------------------------------------------------------------
 
-void tinudht_init(void);
+void tinudht_init(uint8_t pin);
 uint8_t tinudht_read(TinuDHT *ptinudht, uint8_t dht_pin);
 
 // ----------------------------------------------------------------------------
