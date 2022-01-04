@@ -24,6 +24,17 @@ extern "C"
 #define ONEWIRE_ERROR_OK 	0 //! Communication success
 #define ONEWIRE_ERROR_COMM 	1 //! Communication failure
 
+
+/**
+	\brief Configure 1wire registers
+	\param port A pointer to the port output register
+	\param direction A pointer to the port direction register
+	\param portin A pointer to the port input register
+	\param mask A bit mask, determining to which pin the device is connected
+	\returns \ref ONEWIRE_ERROR_OK on success
+*/
+extern uint8_t onewireSetup( volatile uint8_t *_port, volatile uint8_t *_direction, volatile uint8_t *_portin, uint8_t _mask );
+
 /**
 	\brief Initializes 1wire bus (basically sends a reset pulse)
 	\param port A pointer to the port output register
@@ -32,7 +43,7 @@ extern "C"
 	\param mask A bit mask, determining to which pin the device is connected
 	\returns \ref ONEWIRE_ERROR_OK on success
 */
-extern uint8_t onewireInit( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask );
+extern uint8_t onewireInit( void );
 
 /**
 	\brief Sends a single bit over 1wire bus
@@ -43,7 +54,7 @@ extern uint8_t onewireInit( volatile uint8_t *port, volatile uint8_t *direction,
 	\param bit The bit value
 	\returns the bit value
 */
-extern uint8_t onewireWriteBit( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t bit );
+extern uint8_t onewireWriteBit( uint8_t bit );
 
 /**
 	\brief Sends a byte over 1wire bus
@@ -53,7 +64,7 @@ extern uint8_t onewireWriteBit( volatile uint8_t *port, volatile uint8_t *direct
 	\param mask A bit mask, determining to which pin the device is connected
 	\param data Data byte to be sent
 */
-extern void onewireWrite( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t data );
+extern void onewireWrite( uint8_t data );
 
 /**
 	\brief Reads a single bit from 1wire bus
@@ -63,7 +74,7 @@ extern void onewireWrite( volatile uint8_t *port, volatile uint8_t *direction, v
 	\param mask A bit mask, determining to which pin the device is connected
 	\returns received bit value
 */
-extern uint8_t onewireReadBit( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask );
+extern uint8_t onewireReadBit( void );
 
 /**
 	\brief Reads a byte from 1wire bus
@@ -73,7 +84,10 @@ extern uint8_t onewireReadBit( volatile uint8_t *port, volatile uint8_t *directi
 	\param mask A bit mask, determining to which pin the device is connected
 	\returns received byte value
 */
-extern uint8_t onewireRead( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask );
+extern uint8_t onewireRead( void );
+
+extern void onewireWait( void );
+extern void onewireSetHigh( void );
 
 #ifdef __cplusplus
 }

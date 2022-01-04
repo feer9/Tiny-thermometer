@@ -16,9 +16,26 @@
 #include <util/delay.h>
 #include <inttypes.h>
 #include <ds18b20/onewire.h>
+#include <stddef.h>
+
+static volatile uint8_t *_1Wport = NULL;
+static volatile uint8_t *_1Wdirection = NULL;
+static volatile uint8_t *_1Wportin = NULL;
+static uint8_t	_1Wmask = 0;
+
+
+//! Configure 1wire registers
+uint8_t onewireSetup( volatile uint8_t *_port, volatile uint8_t *_direction, volatile uint8_t *_portin, uint8_t _mask )
+{
+	_1Wport = _port;
+	_1Wdirection = _direction;
+	_1Wportin = _portin;
+	_1Wmask = _mask;
+	return ONEWIRE_ERROR_OK;
+}
 
 //! Initializes 1wire bus before transmission
-uint8_t onewireInit( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask )
+uint8_t onewireInit()
 {
 	uint8_t response = 0;
 	uint8_t sreg = SREG; //Store status register
@@ -27,22 +44,22 @@ uint8_t onewireInit( volatile uint8_t *port, volatile uint8_t *direction, volati
 		cli( );
 	#endif
 
-	*port |= mask; //Write 1 to output
-	*direction |= mask; //Set port to output
-	*port &= ~mask; //Write 0 to output
+	*_1Wport |= _1Wmask; //Write 1 to output
+	*_1Wdirection |= _1Wmask; //Set port to output
+	*_1Wport &= ~_1Wmask; //Write 0 to output
 
 	_delay_us( 600 );
 
-	*direction &= ~mask; //Set port to input
+	*_1Wdirection &= ~_1Wmask; //Set port to input
 
 	_delay_us( 70 );
 
-	response = *portin & mask; //Read input
+	response = *_1Wportin & _1Wmask; //Read input
 
 	_delay_us( 200 );
 
-	*port |= mask; //Write 1 to output
-	*direction |= mask; //Set port to output
+	*_1Wport |= _1Wmask; //Write 1 to output
+	*_1Wdirection |= _1Wmask; //Set port to output
 
 	_delay_us( 600 );
 
@@ -52,23 +69,23 @@ uint8_t onewireInit( volatile uint8_t *port, volatile uint8_t *direction, volati
 }
 
 //! Sends a single bit over the 1wire bus
-uint8_t onewireWriteBit( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t bit )
+uint8_t onewireWriteBit( uint8_t bit )
 {
-	(void) portin;
+	(void) _1Wportin;
 	uint8_t sreg = SREG;
 
 	#ifdef ONEWIRE_AUTO_CLI
 		cli( );
 	#endif
 
-	*port |= mask; //Write 1 to output
-	*direction |= mask;
-	*port &= ~mask; //Write 0 to output
+	*_1Wport |= _1Wmask; //Write 1 to output
+	*_1Wdirection |= _1Wmask;
+	*_1Wport &= ~_1Wmask; //Write 0 to output
 
 	if ( bit != 0 ) _delay_us( 8 );
 	else _delay_us( 80 );
 
-	*port |= mask;
+	*_1Wport |= _1Wmask;
 
 	if ( bit != 0 ) _delay_us( 80 );
 	else _delay_us( 2 );
@@ -79,7 +96,7 @@ uint8_t onewireWriteBit( volatile uint8_t *port, volatile uint8_t *direction, vo
 }
 
 //! Transmits a byte over 1wire bus
-void onewireWrite( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask, uint8_t data )
+void onewireWrite( uint8_t data )
 {
 	uint8_t sreg = SREG; //Store status register
 	uint8_t i = 0;
@@ -89,13 +106,13 @@ void onewireWrite( volatile uint8_t *port, volatile uint8_t *direction, volatile
 	#endif
 
 	for ( i = 1; i != 0; i <<= 1 ) //Write byte in 8 single bit writes
-		onewireWriteBit( port, direction, portin, mask, data & i );
+		onewireWriteBit( data & i );
 
 	SREG = sreg;
 }
 
 //! Reads a bit from the 1wire bus
-uint8_t onewireReadBit( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask )
+uint8_t onewireReadBit(  )
 {
 	uint8_t bit = 0;
 	uint8_t sreg = SREG;
@@ -104,13 +121,13 @@ uint8_t onewireReadBit( volatile uint8_t *port, volatile uint8_t *direction, vol
 		cli( );
 	#endif
 
-	*port |= mask; //Write 1 to output
-	*direction |= mask;
-	*port &= ~mask; //Write 0 to output
+	*_1Wport |= _1Wmask; //Write 1 to output
+	*_1Wdirection |= _1Wmask;
+	*_1Wport &= ~_1Wmask; //Write 0 to output
 	_delay_us( 2 );
-	*direction &= ~mask; //Set port to input
+	*_1Wdirection &= ~_1Wmask; //Set port to input
 	_delay_us( 5 );
-	bit = ( ( *portin & mask ) != 0 ); //Read input
+	bit = ( ( *_1Wportin & _1Wmask ) != 0 ); //Read input
 	_delay_us( 60 );
 	SREG = sreg;
 
@@ -118,7 +135,7 @@ uint8_t onewireReadBit( volatile uint8_t *port, volatile uint8_t *direction, vol
 }
 
 //! Reads a byte from the 1wire bus
-uint8_t onewireRead( volatile uint8_t *port, volatile uint8_t *direction, volatile uint8_t *portin, uint8_t mask )
+uint8_t onewireRead(  )
 {
 	uint8_t sreg = SREG; //Store status register
 	uint8_t data = 0;
@@ -129,9 +146,22 @@ uint8_t onewireRead( volatile uint8_t *port, volatile uint8_t *direction, volati
 	#endif
 
 	for ( i = 1; i != 0; i <<= 1 ) //Read byte in 8 single bit reads
-		data |= onewireReadBit( port, direction, portin, mask ) * i;
+		data |= onewireReadBit() * i;
 
 	SREG = sreg;
 
 	return data;
+}
+
+#include <avr/cpufunc.h>
+inline void onewireWait(  )
+{
+	while((*_1Wportin & _1Wmask) == 0)
+		_NOP();
+}
+
+inline void onewireSetHigh(  )
+{
+	*_1Wport |= _1Wmask;
+	*_1Wdirection |= _1Wmask;
 }

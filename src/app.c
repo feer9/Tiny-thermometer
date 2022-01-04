@@ -102,7 +102,7 @@ void loop_ds18b20(bool force_update)
 //    pin_set(tiny_led); 
     
     // Read ds18b20 data
-    ds18b20.status = ds18b20convert_read( &PORTB, &DDRB, &PINB, DS18B20_pinMask, NULL, &ds18b20.current );
+    ds18b20.status = ds18b20convert_read( &ds18b20.current );
     
     if(ds18b20.status != DS18B20_OK) {
       ssd1306_printString(40, PAGE2, _ERR_MSG);

@@ -7,7 +7,7 @@ PROGRAMMER  = usbasp-clone
 
 HEADERS    := $(wildcard include/*.h include/**/*.h)
 SOURCES    := $(wildcard src/*.c)
-CSOURCES   := tinudht.c timer.c onewire.c romsearch.c USI_TWI_Master.c ds18b20.c SSD1306_minimal.c TinyWireM.c main.c
+CSOURCES   := tinudht.c timer.c onewire.c USI_TWI_Master.c ds18b20.c SSD1306_minimal.c TinyWireM.c app.c main.c
 CXXSOURCES := 
 COBJECTS   := $(CSOURCES:%.c=obj/%.o)
 CXXOBJECTS := $(CXXSOURCES:%.cpp=obj/%.o)
@@ -25,7 +25,7 @@ FUSES        := $(FUSES_8MHZ)
 AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B1
 CC = avr-gcc
 CXX = avr-g++
-CFLAGS = -Wall -O2 -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu99 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
+CFLAGS = -Wall -O2 -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu18 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
 CXXFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -fno-threadsafe-statics
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 COMPILE = $(CC) $(CFLAGS) $(LDFLAGS)
@@ -56,7 +56,7 @@ $(CXXOBJECTS): obj/%.o: src/%.cpp Makefile $(HEADERS)
 #	$(COMPILE) -S $< -o $@
 
 flash:	all
-	$(AVRDUDE) -U flash:w:main.hex:i
+	$(AVRDUDE) -U flash:w:bin/main.hex:i
 
 fuse:
 	$(AVRDUDE) $(FUSES)
