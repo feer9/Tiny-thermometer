@@ -1,5 +1,6 @@
 #include "app.h"
 
+static void readButton(void);
 
 /* Attiny85 PINS:
 
@@ -32,7 +33,7 @@ ISR(PCINT0_vect)
 	// si estaba dormido tiene que poner un timeout y volver a dormir
 }
 
-void buttonSimpleAction(void)
+static void buttonSimpleAction(void)
 {
 	if(screen_st == SCREEN_OFF)  {
 		screen_st = SCREEN_DHT11;
@@ -53,12 +54,17 @@ void buttonSimpleAction(void)
 	}
 }
 
-void buttonLongPressed(void)
+static void screenOFF(void)
+{
+	screen_st = SCREEN_OFF;
+	ssd1306_off();
+}
+
+static void buttonLongPressed(void)
 {
 	if(screen_st != SCREEN_OFF)
 	{
-		screen_st = SCREEN_OFF;
-		ssd1306_off();
+		screenOFF();
 	}
 }
 
@@ -76,9 +82,15 @@ void loop(void)
 		loop_ds18b20(false);
 	}
 
+	uint32_t T_inactive = (curr_tick-last_activity);
 
-	if(screen_st == SCREEN_OFF && (curr_tick-last_activity) > 5000) {
+	if(screen_st == SCREEN_OFF && T_inactive > 5000){
 		// Sleep until an external interrupt
+		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+	}
+	else if(T_inactive > 60000) {
+		// Turn screen OFF and sleep until an external interrupt
+		screenOFF();
 		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 	}
 	else {
@@ -90,13 +102,10 @@ void loop(void)
 
 	// todo: avoid the use of 1 ms interrupts to be able to IDLE for more time
 	//       maybe 50 ms?
-
-	// todo: put to deep sleep after X minutes of the device running without user interaction.
-	//       turn off OLED before going to sleep
 }
 
 // Basic debounce function based on an Arduino example
-void readButton(void)
+static void readButton(void)
 {
 	static uint32_t T_last_change = 0; // time in which the last state change happened
 	static uint32_t elapsed = 0;       // time elapsed since last state change

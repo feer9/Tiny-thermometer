@@ -1,5 +1,8 @@
 #include "app.h"
 
+static void fsm_thermomether(void);
+static void drawRaindrop(void);
+
 extern uint32_t curr_tick;
 
 void prepareDisplay_dht11(void)
@@ -9,7 +12,7 @@ void prepareDisplay_dht11(void)
   ssd1306_drawImage( img_thermometer_cold, 0,0);
   ssd1306_printString(20, PAGE1, "Temp:  -");
   ssd1306_printString(20, PAGE3, "Hum.:  -");
-  loop_dht11(1);
+  loop_dht11(true);
 }
 
 void prepareDisplay_ds18b20(void) 
@@ -17,10 +20,10 @@ void prepareDisplay_ds18b20(void)
   ssd1306_setFont(CantarellExtraBold_12x16);
   ssd1306_clear();
   drawRaindrop();
-  loop_ds18b20(1);
+  loop_ds18b20(true);
 }
 
-void fsm_thermomether(void)
+static void fsm_thermomether(void)
 {
   static uint32_t T = 0UL;
   static uint8_t st = 0;
@@ -118,7 +121,7 @@ void loop_ds18b20(bool force_update)
   }
 }
 
-void drawRaindrop(void)
+static void drawRaindrop(void)
 {
   ssd1306_drawImage(img_raindrop, 0,0 );
 }

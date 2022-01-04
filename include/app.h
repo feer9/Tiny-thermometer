@@ -54,12 +54,9 @@ void setup(void);
 void loop(void);
 void prepareDisplay_dht11(void);
 void prepareDisplay_ds18b20(void);
-void drawRaindrop(void);
 void Timer0_init(void);
 void loop_dht11(bool force_update);
 void loop_ds18b20(bool force_update);
-void fsm_thermomether(void);
-void readButton(void);
 
 // byte array of bitmap 10x32px
 static const uint8_t  img_thermometer_cold[] PROGMEM = {
