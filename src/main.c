@@ -118,12 +118,13 @@ void readButton(void)
 		// if the button state has changed:
 		if(curr_reading != button_st) {
 			button_st     = curr_reading;
-			longpressed   = false;
 			last_activity = curr_tick;
 
-			if(curr_reading == BUTTON_RELEASED && elapsed < LONG_PRESS_TIME) {
+			if(curr_reading == BUTTON_RELEASED && elapsed < LONG_PRESS_TIME && !longpressed) {
 				buttonSimpleAction();
 			}
+
+			longpressed   = false;
 		}
 		else if(curr_reading == BUTTON_PRESSED && !longpressed && elapsed >= LONG_PRESS_TIME) {
 			longpressed = true;
@@ -158,7 +159,6 @@ static void GPIO_init(void)
 	pinmode_pullup_off(BUTTON_PIN);
 }
 
-#if 0
 #include <avr/wdt.h>
 static void WDT_off(void)
 {
@@ -170,7 +170,7 @@ static void WDT_off(void)
 	/* Turn off WDT */
 	WDTCR = 0x00;
 }
-#endif
+
 
 static void power_management(void)
 {
@@ -180,7 +180,7 @@ static void power_management(void)
 	PRR  = (1 << PRTIM1) | (1 << PRADC);
 
 	// Turn off Watch Dog Timer
-//	WDT_off();
+	WDT_off();
 }
 
 /*
@@ -205,8 +205,8 @@ void setup(void)
 	ssd1306_setFont(ssd1306xled_font8x16);
 
 	// Init sensors
-	tinudht_init();
-	ds18b20wsp( &PORTB, &DDRB, &PINB, DS18B20_pinMask, NULL, 100, 0, DS18B20_RES11);
+	tinudht_init(TINUDHT_PIN);
+	ds18b20_init(&PORTB, &DDRB, &PINB, DS18B20_pinMask, NULL, 100, 0, DS18B20_RES11);
 
 	power_management();
 
