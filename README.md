@@ -14,16 +14,18 @@ I've just joined them at my personal taste, so I'll let the link to those projec
 
 ## Electrical connection
 
-ATtiny85  | Connected to
---------- | ---------------------
-PB0       | Display SDA
-PB1       | Status LED
-PB2       | Display SCL
-PB3       | DHT11 (pin 2)
-PB4       | DS18B20 (yellow wire)
-PB5       | N/C
+ATtiny85  | PCB                   | Debug
+--------- | --------------------- | --------
+PB0       | Display SDA           | MOSI
+PB1       | Push button           | MISO
+PB2       | Display SCL           | CLK
+PB3       | DHT11 (pin 2)         |
+PB4       | DS18B20 (yellow wire) |
+PB5       | N/C                   | RST
 
-The sensors data lines have a 4.7K PullUp resistor, and the I2C bus have a 10K PullUp resistor, both in SDA and SCL.
+The sensors data lines have a 4.7K PullUp resistor.  
+The push button have a 10K resistor.  
+The I2C bus have a 10K PullUp resistor, both in SDA and SCL.
 
 ## Compilation and flashing
 
