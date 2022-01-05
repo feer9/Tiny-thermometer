@@ -75,6 +75,10 @@ typedef union {
 
 
 uint32_t get_tick(void);
+void     Timer0_setTickrate(uint16_t);
+uint16_t Timer0_getTickrate(void);
+void     Timer0_init(void);
+void     Tiny_SetClockSpeed(uint8_t freq_MHz);
 
 static inline int min(int a, int b) { return a<b ? a : b; }
 static inline int max(int a, int b) { return a>b ? a : b; }
