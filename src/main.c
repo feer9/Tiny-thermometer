@@ -12,8 +12,10 @@ PB4:
 PB5: Reset
 */
 
-// TODO: brown-out detection
+// TODO: brown-out detection, disable at sleep
+
 // TODO: ensure lowest frequency to reduce consumption
+//       can't get too low since the display doesn't appear to like it
 
 uint32_t curr_tick = 0;
 
@@ -28,18 +30,15 @@ static uint8_t screen_st = SCREEN_OFF;
 #include <avr/interrupt.h>
 ISR(PCINT0_vect)
 {
+	// Save time in which this interaction occurred
 	last_activity = get_tick();
-	// cómo se va a quedar en deep sleep hasta que mantenga apretado?
-	// si estaba dormido tiene que poner un timeout y volver a dormir
 }
 
 static void buttonSimpleAction(void)
 {
-	if(screen_st == SCREEN_OFF)  {
-		screen_st = SCREEN_DHT11;
-		ssd1306_on();
-	}
-	else if(++screen_st == SCREEN_MAX) 
+	uint8_t prev_st = screen_st;
+
+	if( (screen_st == SCREEN_OFF) || (++screen_st == SCREEN_MAX) )
 		screen_st = SCREEN_DHT11;
 
 	switch(screen_st)
@@ -51,6 +50,9 @@ static void buttonSimpleAction(void)
 	case SCREEN_DS18B20:
 		prepareDisplay_ds18b20();
 		break;
+	}
+	if(prev_st == SCREEN_OFF) {
+		ssd1306_on();
 	}
 }
 
@@ -84,24 +86,24 @@ void loop(void)
 
 	uint32_t T_inactive = (curr_tick-last_activity);
 
-	if(screen_st == SCREEN_OFF && T_inactive > 5000){
-		// Sleep until an external interrupt
-		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	}
-	else if(T_inactive > 60000) {
-		// Turn screen OFF and sleep until an external interrupt
-		screenOFF();
-		set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-	}
-	else {
-		// Sleep until a timer interrupt
-		set_sleep_mode(SLEEP_MODE_IDLE);
-	}
+	if(T_inactive > LONG_PRESS_TIME)
+	{
+		if(screen_st == SCREEN_OFF && T_inactive > 5000) {
+			// Sleep until an external interrupt
+			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		}
+		else if(T_inactive > 60000) {
+			// Turn screen OFF and sleep until an external interrupt
+			screenOFF();
+			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+		}
+		else {
+			// Sleep until a timer interrupt
+			set_sleep_mode(SLEEP_MODE_IDLE);
+		}
 
-	sleep_mode();
-
-	// todo: avoid the use of 1 ms interrupts to be able to IDLE for more time
-	//       maybe 50 ms?
+		sleep_mode();
+	}
 }
 
 // Basic debounce function based on an Arduino example
@@ -151,9 +153,9 @@ static void enable_interrupts(void)
 	// Turn on external interrupts on BUTTON_PIN
 	//  BUTTON_PIN = PB1 = PCINT1
 
-	// Turn on Pin Change Interrupt Enable on General Interrupt Mask Register
+	// Set Pin Change Interrupt Enable on General Interrupt Mask Register
 	GIMSK = (1 << PCIE);
-	// Enable Pin Change Interrupt on I/O pin 1
+	// Enable Pin Change Interrupt on PB1
 	PCMSK |= (1 << PCINT1);
 
 	// Enable Global Interrupt
@@ -162,8 +164,6 @@ static void enable_interrupts(void)
 
 static void GPIO_init(void)
 {
-//  pinmode_output(LED_PIN);
-//  pin_clear(LED_PIN);
 	pinmode_input(BUTTON_PIN);
 	pinmode_pullup_off(BUTTON_PIN);
 }
@@ -192,17 +192,6 @@ static void power_management(void)
 	WDT_off();
 }
 
-/*
-void eint_pin_enable(uint8_t pin)
-{
-	PCMSK |= (1 << pin);
-}
-
-void eint_pin_disable(uint8_t pin)
-{
-	PCMSK &= ~(1 << pin);
-}*/
-
 void setup(void)
 {
 	GPIO_init();
@@ -229,33 +218,3 @@ void main (void)
   for(;;)
     loop();
 }
-
-/*void test_ds18b20(void)
-{
-	float32_t f;
-
-	ssd1306_clear();
-	drawRaindrop();
-	ssd1306_printString(40+5*ssd1306_getFontWidth(), PAGE2, DEG);
-
-	f.integer = -32;
-	f.decimal = 13;
-	ssd1306_printFloatTo (40, PAGE2, f, 1, 5);
-	_delay_ms(2000);
-
-	f.integer = 45;
-	f.decimal = 67;
-	ssd1306_printFloatTo (40, PAGE2, f, 1, 5);
-	_delay_ms(2000);
-
-	f.integer = -78;
-	f.decimal = 90;
-	ssd1306_printFloatTo (40, PAGE2, f, 1, 5);
-	_delay_ms(2000);
-
-	f.integer = 102;
-	f.decimal = 6;
-	ssd1306_printFloatTo (40, PAGE2, f, 1, 5);
-	_delay_ms(2000);
-
-}*/
