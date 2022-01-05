@@ -7,13 +7,14 @@
 #include "SSD1306_minimal.h"
 #include <avr/pgmspace.h>
 #include <avr/sleep.h>
+#include <avr/interrupt.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //#define DEG "\xa7" "C"
-#define DEG " " "\x3b" "\x3c"
+#define DEG "\x3b" "\x3c"
 #define PERCENT '%'
 
 #define _ERR_MSG "- ERROR "
@@ -48,6 +49,7 @@ typedef struct {
 	int8_t status;
 } DS18B20_data;
 
+typedef enum {SCREEN_OFF, SCREEN_DHT11, SCREEN_DS18B20, SCREEN_MAX} screen_state_t;
 
 void main(void) __attribute__ ((noreturn));
 void setup(void);
@@ -56,6 +58,11 @@ void prepareDisplay_dht11(void);
 void prepareDisplay_ds18b20(void);
 void loop_dht11(bool force_update);
 void loop_ds18b20(bool force_update);
+uint8_t getScreenState(void);
+void buttonSimpleAction(void);
+void buttonLongPressed(void);
+void screenLoop(void);
+
 
 // byte array of bitmap 10x32px
 static const uint8_t  img_thermometer_cold[] PROGMEM = {

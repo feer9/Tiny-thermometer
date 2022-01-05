@@ -1,6 +1,7 @@
 #include "app.h"
 
 static void readButton(void);
+static void endLoop(void);
 
 /* Attiny85 PINS:
 
@@ -12,90 +13,36 @@ PB4:
 PB5: Reset
 */
 
-// TODO: brown-out detection, disable at sleep
-
 // TODO: ensure lowest frequency to reduce consumption
 //       can't get too low since the display doesn't appear to like it
 
-uint32_t curr_tick = 0;
+static uint32_t last_activity = 0;
 
-
-static volatile uint8_t button_st = BUTTON_RELEASED;
-static volatile uint32_t last_activity = 0;
-
-typedef enum {SCREEN_OFF, SCREEN_DHT11, SCREEN_DS18B20, SCREEN_MAX} screen_state_t;
-static uint8_t screen_st = SCREEN_OFF;
-
-
-#include <avr/interrupt.h>
-ISR(PCINT0_vect)
-{
-	// Save time in which this interaction occurred
-	last_activity = get_tick();
-}
-
-static void buttonSimpleAction(void)
-{
-	uint8_t prev_st = screen_st;
-
-	if( (screen_st == SCREEN_OFF) || (++screen_st == SCREEN_MAX) )
-		screen_st = SCREEN_DHT11;
-
-	switch(screen_st)
-	{
-	case SCREEN_DHT11:
-	default:
-		prepareDisplay_dht11();
-		break;
-	case SCREEN_DS18B20:
-		prepareDisplay_ds18b20();
-		break;
-	}
-	if(prev_st == SCREEN_OFF) {
-		ssd1306_on();
-	}
-}
-
-static void screenOFF(void)
-{
-	screen_st = SCREEN_OFF;
-	ssd1306_off();
-}
-
-static void buttonLongPressed(void)
-{
-	if(screen_st != SCREEN_OFF)
-	{
-		screenOFF();
-	}
-}
 
 void loop(void)
 {
-	// freeze the time in which this loop started
-	curr_tick = get_tick();
-
 	readButton();
 
-	if(screen_st == SCREEN_DHT11) {
-		loop_dht11(false);
-	}
-	else if (screen_st == SCREEN_DS18B20) {
-		loop_ds18b20(false);
-	}
+	screenLoop();
 
-	uint32_t T_inactive = (curr_tick-last_activity);
+	endLoop();
+}
+
+
+static void endLoop(void)
+{
+	uint32_t T_inactive = (get_tick()-last_activity);
 
 	if(T_inactive > LONG_PRESS_TIME)
 	{
-		if(screen_st == SCREEN_OFF && T_inactive > 5000) {
+		if(getScreenState() == SCREEN_OFF && T_inactive > 5000) {
 			// Sleep until an external interrupt
-			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+//			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 		}
 		else if(T_inactive > 60000) {
 			// Turn screen OFF and sleep until an external interrupt
-			screenOFF();
-			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+//			screenOFF();
+//			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 		}
 		else {
 			// Sleep until a timer interrupt
@@ -109,11 +56,13 @@ void loop(void)
 // Basic debounce function based on an Arduino example
 static void readButton(void)
 {
-	static uint32_t T_last_change = 0; // time in which the last state change happened
-	static uint32_t elapsed = 0;       // time elapsed since last state change
+	static uint8_t button_st = BUTTON_RELEASED;
 	static uint8_t last_reading = BUTTON_RELEASED;
+	static uint32_t T_last_change = 0; // time in which the last state change happened
 	static bool longpressed = false;
+	uint32_t elapsed;                  // time elapsed since last state change
 	uint8_t curr_reading = pin_get(BUTTON_PIN);
+	const uint32_t curr_tick = get_tick();
 
 	// If the switch changed, due to noise or pressing:
 	if(curr_reading != last_reading) {
@@ -122,13 +71,15 @@ static void readButton(void)
 	}
 
 	elapsed = curr_tick-T_last_change;
-	if(elapsed > DEBOUNCE_DELAY) {
+	if(elapsed > DEBOUNCE_DELAY)
+	{
 		// whatever the reading is at, it's been there for longer than
 		// the debounce delay, so take it as the actual current state:
 
 		// if the button state has changed:
-		if(curr_reading != button_st) {
-			button_st     = curr_reading;
+		if(curr_reading != button_st)
+		{	
+			button_st = curr_reading;
 			last_activity = curr_tick;
 
 			if(curr_reading == BUTTON_RELEASED && elapsed < LONG_PRESS_TIME && !longpressed) {
@@ -137,7 +88,8 @@ static void readButton(void)
 
 			longpressed   = false;
 		}
-		else if(curr_reading == BUTTON_PRESSED && !longpressed && elapsed >= LONG_PRESS_TIME) {
+		else if(curr_reading == BUTTON_PRESSED && !longpressed && elapsed >= LONG_PRESS_TIME)
+		{
 			longpressed = true;
 			buttonLongPressed();
 		}
@@ -190,11 +142,18 @@ static void power_management(void)
 
 	// Turn off Watch Dog Timer
 	WDT_off();
+
+	// Turn OFF the Brown-out Detection while in Power-down sleep mode
+	MCUCR = (1 << BODS) | (1 << BODSE);
+	MCUCR = (1 << BODS) | (0 << BODSE);
 }
 
 void setup(void)
 {
 	GPIO_init();
+
+	// Stop interrupts
+    cli();
 
 	Timer0_init();
 
