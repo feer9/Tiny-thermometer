@@ -58,9 +58,10 @@ void loop_dht11(bool force_update)
   static TinuDHT_data tinudht = { 0 };
   static uint32_t T_dht11 = 0UL;
 
-  if(curr_tick > T_dht11 || force_update) { // update dht11
+  // update dht11
+  if(curr_tick > T_dht11 || force_update)
+  {
     T_dht11 = curr_tick+1500;
-//    pin_set(tiny_led);
 
     // Read DHT11 data
     tinudht.status = tinudht_read(&tinudht.current, TINUDHT_PIN);
@@ -69,7 +70,7 @@ void loop_dht11(bool force_update)
     {
       const char* buf = _ERR_MSG;
       ssd1306_printString(68, PAGE1, buf);
-      ssd1306_printString(68, PAGE3, buf);
+      ssd1306_printNumberTo(68, PAGE3, tinudht.status);
     }
     else
     {
@@ -79,17 +80,15 @@ void loop_dht11(bool force_update)
         tmp.integer = tinudht.current.temperature;
         tmp.decimal = tinudht.current.temp_dec;
         ssd1306_printFloatTo (68, PAGE1, tmp, 1, 5);
-        ssd1306_printString(68+5*8, PAGE1, DEG);
+        ssd1306_printString(68+4*8, PAGE1, DEG);
       }
       if((tinudht.current.humidity != tinudht.last.humidity) || force_update)
       {
-        ssd1306_printString(68, PAGE3, "      %");
         ssd1306_printNumberTo(68, PAGE3, tinudht.current.humidity);
+        ssd1306_printString(68+2*8, PAGE3, "    %");
       }
     }
     tinudht.last = tinudht.current;
-
-//    pin_clear(tiny_led);
   }
 
   fsm_thermomether();
@@ -100,14 +99,16 @@ void loop_ds18b20(bool force_update)
   static DS18B20_data ds18b20 = { 0 };
   static uint32_t T_ds18b20 = 0UL;
 
-  if(curr_tick > T_ds18b20 || force_update) { // update ds18b20
-    T_ds18b20 = curr_tick+250;
-//    pin_set(tiny_led); 
+  // update ds18b20
+  if(curr_tick > T_ds18b20 || force_update) 
+  {
+    T_ds18b20 = curr_tick+500;
     
     // Read ds18b20 data
     ds18b20.status = ds18b20convert_read( &ds18b20.current );
     
-    if(ds18b20.status != DS18B20_OK) {
+    if(ds18b20.status != DS18B20_OK)
+    {
       ssd1306_printString(40, PAGE2, _ERR_MSG);
     }
     else if(( ds18b20.last.data != ds18b20.current.data ) || force_update)
@@ -116,8 +117,6 @@ void loop_ds18b20(bool force_update)
       ssd1306_printFloatTo (40, PAGE2, ds18b20.current, 1, 5);
       ssd1306_printString(40+5*ssd1306_getFontWidth(), PAGE2, DEG);
     }
-
-//    pin_clear(tiny_led);
   }
 }
 

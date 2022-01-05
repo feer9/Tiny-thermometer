@@ -13,10 +13,10 @@ extern "C" {
 #endif
 
 //#define DEG "\xa7" "C"
-#define DEG "\x3b" "\x3c"
+#define DEG " " "\x3b" "\x3c"
 #define PERCENT '%'
 
-#define _ERR_MSG "-\072\072\072\072\072\072\072"
+#define _ERR_MSG "- ERROR "
 
 #define PAGE_HEIGHT (32/4)
 #define PAGE1 (0 * PAGE_HEIGHT)
@@ -33,8 +33,8 @@ extern "C" {
 #define BUTTON_RELEASED 0U
 
 
-#define DEBOUNCE_DELAY 50
-#define LONG_PRESS_TIME 1000
+#define DEBOUNCE_DELAY    50 /* time in ms */
+#define LONG_PRESS_TIME 1500 /* time in ms */
 
 typedef struct {
 	TinuDHT current;
@@ -54,7 +54,6 @@ void setup(void);
 void loop(void);
 void prepareDisplay_dht11(void);
 void prepareDisplay_ds18b20(void);
-void Timer0_init(void);
 void loop_dht11(bool force_update);
 void loop_ds18b20(bool force_update);
 
