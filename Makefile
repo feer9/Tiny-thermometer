@@ -16,13 +16,15 @@ OBJECTS    := $(COBJECTS) $(CXXOBJECTS)
 # for ATTiny85
 # see http://www.engbedded.com/fusecalc/
 # default to 1MHz, you need to use -B3 option in avrdude
-FUSES_DEFAULT = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m 
-FUSES_8MHZ    = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
-FUSES_16MHZ   = -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m 
-FUSES        := $(FUSES_8MHZ)
+FUSES_DEFAULT     = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
+FUSES_1MHZ_BOD2_7 = -U lfuse:w:0x62:m -U hfuse:w:0xdd:m -U efuse:w:0xff:m
+FUSES_8MHZ        = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
+FUSES_8MHZ_BOD2_7 = -U lfuse:w:0xe2:m -U hfuse:w:0xdd:m -U efuse:w:0xff:m
+FUSES_16MHZ       = -U lfuse:w:0xe1:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
+FUSES            := $(FUSES_8MHZ_BOD2_7)
 
 # Tune the lines below only if you know what you are doing:
-AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B1
+AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B3
 CC = avr-gcc
 CXX = avr-g++
 CFLAGS = -Wall -O2 -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu18 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
