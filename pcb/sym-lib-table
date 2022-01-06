@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name tp4056)(type Legacy)(uri ${KIPRJMOD}/lib/tp4056.lib)(options "")(descr ""))
+  (lib (name ssd1306_128x32)(type Legacy)(uri ${KIPRJMOD}/lib/ssd1306_128x32.lib)(options "")(descr ""))
+)

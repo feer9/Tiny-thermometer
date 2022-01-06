@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP SSD1306_128x32
+D OLED graphical display 128x32px, I2C, 3.3V or 5V VDD
+K display LCD graphic
+F https://www.digchip.com/datasheets/parts/datasheet/1121/AG-12864E-pdf.php
+$ENDCMP
+#
+#End Doc Library

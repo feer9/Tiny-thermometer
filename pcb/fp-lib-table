@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name ssd1306)(type KiCad)(uri ${KIPRJMOD}/footprints/ssd1306.pretty)(options "")(descr ""))
+  (lib (name tp4056)(type KiCad)(uri ${KIPRJMOD}/footprints/tp4056.pretty)(options "")(descr ""))
+)
