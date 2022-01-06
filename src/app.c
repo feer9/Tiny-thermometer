@@ -2,16 +2,12 @@
 
 static void fsm_thermomether(void);
 static void drawRaindrop(void);
-static void screenOFF(void);
+void screenOFF(void);
 
 static uint8_t screen_st = SCREEN_OFF;
+extern uint32_t last_activity;
 
 
-#include <avr/cpufunc.h>
-ISR(PCINT0_vect)
-{
-	_NOP();
-}
 
 void buttonSimpleAction(void)
 {
@@ -61,7 +57,7 @@ void screenLoop(void)
 
 /* ------------------------------------------------------------- */
 
-static void screenOFF(void)
+void screenOFF(void)
 {
 	screen_st = SCREEN_OFF;
 	ssd1306_off();

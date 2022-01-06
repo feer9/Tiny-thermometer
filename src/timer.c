@@ -9,9 +9,7 @@ static volatile uint32_t tick = 0;
 
 void Timer0_init(void)
 {
-    // Timer0 interrupt at 1000 Hz (1 ms)
-
-    cli();								// Stop interrupts
+    // Timer0 periodic interrupt at DEFAULT_TICKRATE
 
     GTCCR &= ~(1<<PSR0);				// Clear Prescaler Reset Timer/Counter0
 	GTCCR |=  (1<<TSM);					// Set Timer/Counter Synchronization Mode
@@ -19,7 +17,7 @@ void Timer0_init(void)
     TCNT0 = 0;							// Initialize counter value to 0
 
 
-    // Set Prescaler and Output Compare Register for 1 ms interruptions
+    // Set Prescaler and Output Compare Register for DEFAULT_TICKRATE ms interruptions
 	Timer0_setTickrate(DEFAULT_TICKRATE);
 
 

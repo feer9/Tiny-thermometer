@@ -35,21 +35,29 @@ static void endLoop(void)
 
 	if(T_inactive > LONG_PRESS_TIME)
 	{
+		uint8_t sleepmode;
 		if(getScreenState() == SCREEN_OFF && T_inactive > 5000) {
 			// Sleep until an external interrupt
-//			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+			sleepmode = SLEEP_MODE_PWR_DOWN;
 		}
 		else if(T_inactive > 60000) {
 			// Turn screen OFF and sleep until an external interrupt
-//			screenOFF();
-//			set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+			screenOFF();
+			sleepmode = SLEEP_MODE_PWR_DOWN;
 		}
 		else {
 			// Sleep until a timer interrupt
-			set_sleep_mode(SLEEP_MODE_IDLE);
+			sleepmode = SLEEP_MODE_IDLE;
 		}
-
-		sleep_mode();
+		
+		cli();
+		set_sleep_mode(sleepmode);
+		sleep_enable();
+		if (sleepmode == SLEEP_MODE_PWR_DOWN)
+			sleep_bod_disable();
+		sei();
+		sleep_cpu();
+		sleep_disable();
 	}
 }
 
@@ -98,7 +106,10 @@ static void readButton(void)
 	last_reading = curr_reading;
 }
 
-
+ISR(PCINT0_vect)
+{
+	last_activity = get_tick();
+}
 
 static void enable_interrupts(void)
 {
@@ -142,10 +153,6 @@ static void power_management(void)
 
 	// Turn off Watch Dog Timer
 	WDT_off();
-
-	// Turn OFF the Brown-out Detection while in Power-down sleep mode
-	MCUCR = (1 << BODS) | (1 << BODSE);
-	MCUCR = (1 << BODS) | (0 << BODSE);
 }
 
 void setup(void)

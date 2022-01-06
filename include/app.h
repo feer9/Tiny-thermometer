@@ -62,6 +62,7 @@ uint8_t getScreenState(void);
 void buttonSimpleAction(void);
 void buttonLongPressed(void);
 void screenLoop(void);
+void screenOFF(void);
 
 
 // byte array of bitmap 10x32px
