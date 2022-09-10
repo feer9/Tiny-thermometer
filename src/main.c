@@ -1,4 +1,5 @@
 #include "app.h"
+#include <avr/wdt.h>
 
 static void readButton(void);
 static void endLoop(void);
@@ -16,49 +17,42 @@ PB5: Reset
 // TODO: ensure lowest frequency to reduce consumption
 //       can't get too low since the display doesn't appear to like it
 
+//__attribute__ ((address (0x1234)))
+
 static uint32_t last_activity = 0;
 
-
-void loop(void)
-{
-	readButton();
-
-	screenLoop();
-
-	endLoop();
-}
 
 
 static void endLoop(void)
 {
 	uint32_t T_inactive = (get_tick()-last_activity);
+	uint8_t sleepmode;
 
-	if(T_inactive > LONG_PRESS_TIME)
-	{
-		uint8_t sleepmode;
-		if(getScreenState() == SCREEN_OFF && T_inactive > 5000) {
-			// Sleep until an external interrupt
-			sleepmode = SLEEP_MODE_PWR_DOWN;
-		}
-		else if(T_inactive > 60000) {
-			// Turn screen OFF and sleep until an external interrupt
-			screenOFF();
-			sleepmode = SLEEP_MODE_PWR_DOWN;
-		}
-		else {
-			// Sleep until a timer interrupt
-			sleepmode = SLEEP_MODE_IDLE;
-		}
-		
-		cli();
-		set_sleep_mode(sleepmode);
-		sleep_enable();
-		if (sleepmode == SLEEP_MODE_PWR_DOWN)
-			sleep_bod_disable();
-		sei();
-		sleep_cpu();
-		sleep_disable();
+	if(T_inactive <= LONG_PRESS_TIME)
+		return;
+	
+	if(getScreenState() == SCREEN_OFF && T_inactive > 5000) {
+		// Sleep until an external interrupt
+		sleepmode = SLEEP_MODE_PWR_DOWN;
 	}
+	else if(T_inactive > 1000*60*5) {
+		// Turn screen OFF and sleep until an external interrupt
+		screenOFF();
+		sleepmode = SLEEP_MODE_PWR_DOWN;
+	}
+	else {
+		// Sleep until a timer interrupt
+		sleepmode = SLEEP_MODE_IDLE;
+	}
+	
+	cli();
+	set_sleep_mode(sleepmode);
+	sleep_enable();
+	if (sleepmode == SLEEP_MODE_PWR_DOWN)
+		sleep_bod_disable();
+	sei();
+	sleep_cpu();
+	sleep_disable();
 }
 
 // Basic debounce function based on an Arduino example
@@ -131,7 +125,6 @@ static void GPIO_init(void)
 	pinmode_pullup_off(BUTTON_PIN);
 }
 
-#include <avr/wdt.h>
 static void WDT_off(void)
 {
 	wdt_reset();
@@ -142,7 +135,6 @@ static void WDT_off(void)
 	/* Turn off WDT */
 	WDTCR = 0x00;
 }
-
 
 static void power_management(void)
 {
@@ -155,7 +147,7 @@ static void power_management(void)
 	WDT_off();
 }
 
-void setup(void)
+void uC_init(void)
 {
 	GPIO_init();
 
@@ -164,23 +156,22 @@ void setup(void)
 
 	Timer0_init();
 
-	// Init OLED Display
-	ssd1306_init(ssd1306_address);
-	ssd1306_setFont(ssd1306xled_font8x16);
-
-	// Init sensors
-	tinudht_init(TINUDHT_PIN);
-	ds18b20_init(&PORTB, &DDRB, &PINB, DS18B20_pinMask, NULL, 100, 0, DS18B20_RES11);
-
 	power_management();
 
 	enable_interrupts();
+
+	appSetup();
 }
 
 void main (void)
 {
-  setup();
+	uC_init();
 
-  for(;;)
-    loop();
+	for(;;) {
+		readButton();
+
+		appLoop();
+
+		endLoop();
+	}
 }

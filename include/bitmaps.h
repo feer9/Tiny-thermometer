@@ -1,8 +1,13 @@
-#ifndef _FONTS_H
-#define _FONTS_H
+#ifndef _BITMAPS_H
+#define _BITMAPS_H
 
 #include <stdint.h>
 #include <avr/pgmspace.h>
+
+extern const uint8_t img_thermometer_cold[] PROGMEM;
+extern const uint8_t img_thermometer_warm[] PROGMEM;
+extern const uint8_t img_thermometer_hot[] PROGMEM;
+extern const uint8_t img_raindrop[] PROGMEM;
 
 // Font structure as saved in flash memory
 typedef struct {
@@ -28,4 +33,6 @@ extern const uint8_t comic_sans_font24x32_123[] PROGMEM;
 extern const uint8_t ssd1306xled_font8x16[] PROGMEM;
 extern const uint8_t CantarellExtraBold_12x16[] PROGMEM;
 
-#endif // _FONTS_H
+
+
+#endif // _BITMAPS_H
