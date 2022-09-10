@@ -33,7 +33,7 @@
 #include <avr/pgmspace.h>
 #include <string.h>
 #include "utils.h"
-#include "fonts.h"
+#include "bitmaps.h"
 
 // config
 #define ssd1306_address 0x3c
@@ -131,25 +131,22 @@ void ssd1306_clear(void);
 void ssd1306_startScreen(void);
 
 // set the clipArea, by default (0,0,128,8)
-void ssd1306_clipArea(unsigned char col, unsigned char row, unsigned char w, unsigned char h);
+void ssd1306_clipArea(unsigned char col, unsigned char page, unsigned char w, unsigned char h);
 
 // move the cursor to a location (similar to clipArea)
-void ssd1306_cursorTo( unsigned char row, unsigned char col );
+void ssd1306_cursorTo( unsigned char col, unsigned char page );
 
 // print a single character
 void ssd1306_printChar( char ch );
 
-// print a string to the screen
+// print a string to the screen in a given position
 void ssd1306_printString(uint8_t col, uint8_t row, const char * pText);
 
-// print a string to the screen in a given position
-void ssd1306_printStringTo(uint8_t row, uint8_t col, const char *str);
-
 // print a number to the screen in a given position
-void ssd1306_printNumberTo(uint8_t row, uint8_t col, int num);
+void ssd1306_printNumber(uint8_t col, uint8_t row, int num);
 
 // print a floating point number to the screen in a given position
-void ssd1306_printFloatTo(uint8_t row, uint8_t col, const float32_t num, 
+void ssd1306_printFloat(uint8_t col, uint8_t row, const float32_t num, 
                           uint8_t decimal_digits, uint8_t min_len);
 
 // draw a bitmap into a given x,y position

@@ -12,6 +12,7 @@
 */
 
 #include <stddef.h>
+#include <stdlib.h>
 #include <util/delay.h>
 #include <ds18b20/ds18b20.h>
 #include <ds18b20/onewire.h>
@@ -214,10 +215,9 @@ uint8_t ds18b20csp(  )
 }
 
 //! Read temperature
-uint8_t ds18b20read( float32_t *temperature )
+uint8_t ds18b20read( float32_t *t )
 {
 	//Read temperature from DS18B20
-	//Note: returns actual temperature * 16
 
 	uint8_t sp[9];
 	uint8_t ec = 0;
@@ -227,13 +227,27 @@ uint8_t ds18b20read( float32_t *temperature )
 
 	if ( ec != DS18B20_ERROR_OK )
 	{
-		temperature->data = 0;
+		t->data = 0;
 		return ec;
 	}
 
-	//Get temperature from received data
-	temperature->integer = (int16_t) ((sp[1] << 8 ) + sp[0]) / 16 ;
-	temperature->decimal = (int16_t) (sp[0] & 0x0F) * 10000 / 16 ;
+	// Get temperature from received data
+	// scratchpad[0]: LSB
+	// scratchpad[1]: MSB
+
+	int16_t data = (sp[1] << 8 ) + sp[0];
+
+	t->sign = (data & 0x8000) == 0 ? 1 : -1;
+
+	if(t->sign == -1)
+		data = ((~data) + 1); // two's complement
+
+	// multiply by (10000 / 16) or 625
+	uint32_t temp10000 = 625UL * (uint32_t)data;
+
+	t->integer = temp10000 / 10000;
+
+	t->decimal = temp10000 % 10000;
 
 	return DS18B20_ERROR_OK;
 }
