@@ -5,29 +5,32 @@ DEVICE      = attiny85
 CLOCK       = 8000000
 PROGRAMMER  = usbasp-clone
 
+# for ATTiny85
+# see http://www.engbedded.com/fusecalc/
+# default to 1MHz, you need to use -B3 option in avrdude
+FUSES_1MHZ        = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
+FUSES_1MHZ_BOD2_7 = -U lfuse:w:0x62:m -U hfuse:w:0xdd:m -U efuse:w:0xff:m
+FUSES_8MHZ        = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
+FUSES_8MHZ_BOD2_7 = -U lfuse:w:0xe2:m -U hfuse:w:0xdd:m -U efuse:w:0xff:m
+FUSES_16MHZ       = -U lfuse:w:0xe1:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
+FUSES_DEFAULT    := $(FUSES_1MHZ)
+FUSES            := $(FUSES_8MHZ)
+# Remember to adjust CLOCK definition when changing fuses
+# Don't use 1MHz, it gets all buggy
+
 HEADERS    := $(wildcard include/*.h include/**/*.h)
 SOURCES    := $(wildcard src/*.c)
-CSOURCES   := tinudht.c timer.c onewire.c USI_TWI_Master.c ds18b20.c SSD1306_minimal.c TinyWireM.c app.c main.c
+CSOURCES   := DHT11.c timer.c onewire.c USI_TWI_Master.c ds18b20.c SSD1306_minimal.c TinyWireM.c bitmaps.c app.c main.c
 CXXSOURCES := 
 COBJECTS   := $(CSOURCES:%.c=obj/%.o)
 CXXOBJECTS := $(CXXSOURCES:%.cpp=obj/%.o)
 OBJECTS    := $(COBJECTS) $(CXXOBJECTS)
 
-# for ATTiny85
-# see http://www.engbedded.com/fusecalc/
-# default to 1MHz, you need to use -B3 option in avrdude
-FUSES_DEFAULT     = -U lfuse:w:0x62:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
-FUSES_1MHZ_BOD2_7 = -U lfuse:w:0x62:m -U hfuse:w:0xdd:m -U efuse:w:0xff:m
-FUSES_8MHZ        = -U lfuse:w:0xe2:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
-FUSES_8MHZ_BOD2_7 = -U lfuse:w:0xe2:m -U hfuse:w:0xdd:m -U efuse:w:0xff:m
-FUSES_16MHZ       = -U lfuse:w:0xe1:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
-FUSES            := $(FUSES_8MHZ_BOD2_7)
-
 # Tune the lines below only if you know what you are doing:
-AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B3
+AVRDUDE = avrdude -c $(PROGRAMMER) -p $(DEVICE) -B 1
 CC = avr-gcc
 CXX = avr-g++
-CFLAGS = -Wall -O2 -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu18 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
+CFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -std=gnu18 -W -Wstrict-prototypes -ffunction-sections -fdata-sections -ffreestanding -mcall-prologues
 CXXFLAGS = -Wall -Os -I./include -D__AVR_ATtiny85__ -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -fno-threadsafe-statics
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 COMPILE = $(CC) $(CFLAGS) $(LDFLAGS)
@@ -56,6 +59,9 @@ $(CXXOBJECTS): obj/%.o: src/%.cpp Makefile $(HEADERS)
 
 #.c.s:
 #	$(COMPILE) -S $< -o $@
+
+check:
+	$(AVRDUDE)
 
 flash:	all
 	$(AVRDUDE) -U flash:w:bin/main.hex:i
