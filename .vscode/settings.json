@@ -1,20 +1,59 @@
 {
-    "files.associations": {
-        "*.ui": "xml",
-        "io.h": "c",
-        "iotn85.h": "c",
-        "delay.h": "c",
-        "gpio.h": "c",
-        "softwareserial.h": "c",
-        "inttypes.h": "c",
-        "stddef.h": "c",
-        "utils.h": "c",
-        "cstdio": "cpp",
-        "ds18b20.h": "c",
-        "power.h": "c",
-        "pgmspace.h": "c",
-        "cpufunc.h": "c",
-        "builtins.h": "c",
-        "delay_basic.h": "c"
-    }
+  "files.associations": {
+    "*.ui": "xml",
+    "io.h": "c",
+    "iotn85.h": "c",
+    "delay.h": "c",
+    "gpio.h": "c",
+    "softwareserial.h": "c",
+    "inttypes.h": "c",
+    "stddef.h": "c",
+    "utils.h": "c",
+    "cstdio": "cpp",
+    "ds18b20.h": "c",
+    "power.h": "c",
+    "pgmspace.h": "c",
+    "cpufunc.h": "c",
+    "builtins.h": "c",
+    "delay_basic.h": "c",
+    "app.h": "c",
+    "wdt.h": "c",
+    "tinudht.h": "c",
+    "stdint.h": "c",
+    "stdint-gcc.h": "c",
+    "onewire.h": "c",
+    "interrupt.h": "c",
+    "bitmaps.h": "c",
+    "stdlib.h": "c",
+    "dht11.h": "c"
+  },
+  "C_Cpp_Runner.cCompilerPath": "/usr/bin/gcc",
+  "C_Cpp_Runner.cppCompilerPath": "g++",
+  "C_Cpp_Runner.debuggerPath": "gdb",
+  "C_Cpp_Runner.cStandard": "",
+  "C_Cpp_Runner.cppStandard": "",
+  "C_Cpp_Runner.msvcBatchPath": "",
+  "C_Cpp_Runner.useMsvc": false,
+  "C_Cpp_Runner.warnings": [
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic"
+  ],
+  "C_Cpp_Runner.enableWarnings": true,
+  "C_Cpp_Runner.warningsAsError": false,
+  "C_Cpp_Runner.compilerArgs": [],
+  "C_Cpp_Runner.linkerArgs": [],
+  "C_Cpp_Runner.includePaths": [],
+  "C_Cpp_Runner.includeSearch": [
+    "*",
+    "**/*"
+  ],
+  "C_Cpp_Runner.excludeSearch": [
+    "**/build",
+    "**/build/**",
+    "**/.*",
+    "**/.*/**",
+    "**/.vscode",
+    "**/.vscode/**"
+  ]
 }

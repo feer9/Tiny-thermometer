@@ -1,0 +1,42 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "Make",
+			"command": "/usr/bin/make",
+			"args": [
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Compila el programa"
+		},
+		{
+			"type": "cppbuild",
+			"label": "Make flash",
+			"command": "/usr/bin/make",
+			"args": [
+				"flash"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"detail": "Compila y flashea el programa en el uC"
+		}
+	]
+}

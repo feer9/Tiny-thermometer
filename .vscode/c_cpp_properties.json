@@ -1,20 +1,19 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "linux-gcc-x64",
             "includePath": [
-                "${workspaceFolder}",
-                "${workspaceFolder}/include",
-                "/usr/avr/include/**"
+                "${workspaceFolder}/**",
+                "/usr/avr/include"
             ],
             "defines": [
                 "__AVR_ATtiny85__",
                 "F_CPU=8000000"
             ],
-            "compilerPath": "/usr/bin/avr-g++",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "${default}",
+            "cppStandard": "${default}",
+            "intelliSenseMode": "linux-gcc-x64",
             "compilerArgs": [
                 "-Wall",
                 "-Os",
@@ -22,7 +21,8 @@
                 "-D__AVR_ATtiny85__",
                 "-DF_CPU=8000000",
                 "-mmcu=attiny85"
-            ]
+            ],
+            "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
     "version": 4
