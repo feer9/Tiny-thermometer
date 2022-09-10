@@ -1,5 +1,7 @@
 # Tiny-thermomether
 
+![Alt text](case/img1.jpg) 
+
 This project is mostly a recopilation of other projects I've found on various pages.  
 I've just joined them at my personal taste, so I'll let the link to those projects below.  
 
