@@ -6,6 +6,7 @@
 void Timer0_setTickrate(uint16_t);
 
 static volatile uint32_t tick = 0;
+static uint16_t tickrate = DEFAULT_TICKRATE;
 
 void Timer0_init(void)
 {
@@ -27,8 +28,6 @@ void Timer0_init(void)
 
     // This function doesn't enable the ISR. sei() must be called later on.
 }
-
-static uint16_t tickrate = DEFAULT_TICKRATE;
 
 // T: Time in ms between interruptions
 void Timer0_setTickrate(uint16_t T)
