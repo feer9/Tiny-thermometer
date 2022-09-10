@@ -1,2 +1,4 @@
 obj
 disasm.s
+resources
+pcb/*-backups
